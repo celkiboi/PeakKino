@@ -1,0 +1,49 @@
+# Ignore compiled Python files
+*.pyc
+
+# Ignore Python bytecode cache
+__pycache__/
+
+# Ignore the virtual environment
+/env/
+
+# Ignore database files
+*.sqlite3
+
+# Ignore local settings file
+local_settings.py
+
+# Ignore IDE files
+.vscode/
+*.pydevproject
+*.pydevworkspace
+*.project
+*.settings/
+
+# Ignore migration files
+/migrations/
+
+# Ignore static files collected for production
+/staticfiles/
+
+# Ignore secret keys and sensitive information
+*.secret
+
+# Ignore log files
+*.log
+
+# Ignore backup files
+*~
+
+# Ignore cache and session directories
+__pycache__/
+.cache/
+.sessions/
+
+# Ignore test database
+*.db.sqlite3
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
