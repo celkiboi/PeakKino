@@ -1,21 +1,66 @@
 from django.db import models
+import uuid
 
-class Video(models.Model):
-    id = models.IntegerField(primary_key=True)
-    title = models.CharField(max_length=40, null=True) # does not contain Episode/Season info
-    uploaded = models.DateTimeField()
-
-    '''
-    the relative path in the media folder
-    Example a series will be
-    /{entry_id}/{season_id}/{episode_id}/source
-    '''
-    path = models.CharField(max_length=255)
-    AGE_RATING = [
+class Resource(models.Model):
+    AGE_RATING_CHOICES = [
         ('18', '18+'),
         ('15', '15+'),
         ('12', '12+'),
         ('7', '7+'),
         ('unrated', 'Unrated')
     ]
-    age_rating = models.CharField(max_length=8, choices=AGE_RATING)
+    age_rating = models.CharField(max_length=8, choices=AGE_RATING_CHOICES)
+
+class Video(models.Model):
+    TYPE_CHOICES = [
+        ('movie', 'Movie'),
+        ('episode', 'Episode'),
+        ('clip', 'Clip'),
+        ('other', 'Other')
+    ]
+    uploaded = models.DateTimeField()
+    uuid = models.CharField(max_length=36, default=uuid.uuid4, editable=False, unique=True)
+    extension = models.CharField(max_length=8, default='mp4')
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+
+    def get_attached_obj(self):
+        if self.type == 'clip':
+            return Clip.objects.filter(video =self.pk).first()
+        elif self.type == 'movie':
+            return Movie.objects.filter(video=self.pk).first()
+        elif self.type == 'episode':
+            return Episode.objects.filter(video=self.pk).first()
+    
+    def get_path(self):
+        obj = self.get_attached_obj()
+        resource = obj.resource
+        resource_id = resource.pk
+        uuid_path = str(self.uuid).replace('-', '')
+
+        return f'/{resource_id}/{uuid_path}.{self.extension}'
+        
+
+class Movie(models.Model):
+    title = models.CharField(max_length=255)
+    video = models.OneToOneField(Video, on_delete=models.CASCADE, primary_key=True)
+    lead_actor = models.CharField(max_length=255)
+    director = models.CharField(max_length=255)
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+
+class Show(models.Model):
+    name = models.CharField(max_length=255)
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+
+class Season(models.Model):
+    show = models.ForeignKey(Show, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+
+class Episode(models.Model):
+    title = models.CharField(max_length=255)
+    season = models.ForeignKey(Season, related_name='episodes', on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+
+class Clip(models.Model):
+    title = models.CharField(max_length=255)
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)

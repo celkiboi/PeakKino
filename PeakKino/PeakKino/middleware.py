@@ -1,6 +1,8 @@
 from django.http import HttpResponseForbidden
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
+from videos.models import Resource
+from django.shortcuts import get_object_or_404
 import os
 
 class CheckAuthentificationMiddleware:
@@ -10,6 +12,10 @@ class CheckAuthentificationMiddleware:
     def __call__(self, request):
         if not request.user.is_authenticated and request.path.startswith(settings.MEDIA_URL):
             return HttpResponseForbidden("You are not authorized to access this resource.")
+        
+        # if request.path.startswith(settings.MEDIA_URL):
+        #     resource_id = int(request.path.split("/")[1])
+        #     #resource = 
         
         response = self.get_response(request)
         return response
