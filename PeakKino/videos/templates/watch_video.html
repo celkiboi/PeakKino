@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watching {{ video.title }}</title>
     <style>
         video {
@@ -10,9 +9,10 @@
             max-height: 100vh;
         }
     </style>
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
 </head>
 <body>
-    <video controls autoplay="true">
+    <video controls>
         <source src="{{ path }}" type="video/mp4">
     </video>
     <h1>
