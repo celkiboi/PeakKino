@@ -15,6 +15,7 @@ class Video(models.Model):
         ('18', '18+'),
         ('15', '15+'),
         ('12', '12+'),
-        ('7', '7+')
+        ('7', '7+'),
+        ('unrated', 'Unrated')
     ]
-    age_rating = models.CharField(max_length=3, choices=AGE_RATING)
+    age_rating = models.CharField(max_length=8, choices=AGE_RATING)
