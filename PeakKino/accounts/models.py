@@ -3,31 +3,32 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserM
 from django.utils import timezone
 
 class CustomUserManager(UserManager):
-    def _create_user(self, user_name, password, **extra_fields):
+    def _create_user(self, user_name, password, age, **extra_fields):
         
-        user = self.model(user_name=user_name, **extra_fields)
+        user = self.model(user_name=user_name, age=age,  **extra_fields)
         user.set_password(password)
         user.save(using=self._db)  
 
         return user
     
-    def create_user(self, user_name=None, password=None, **extra_fields):
+    def create_user(self, user_name=None, password=None, age=7, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
         extra_fields.setdefault('is_approved', False)
 
-        return self._create_user(user_name, password, **extra_fields)
+        return self._create_user(user_name, password, age, **extra_fields)
     
-    def create_superuser(self, user_name=None, password=None, **extra_fields):
+    def create_superuser(self, user_name=None, password=None, age=18, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_approved', True)
 
-        return self._create_user(user_name, password, **extra_fields)
+        return self._create_user(user_name, password, age, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
     user_name = models.CharField(max_length=20, unique=True)
     is_approved = models.BooleanField(default=False)
+    age = models.IntegerField(null=False)
 
     USERNAME_FIELD = 'user_name'
 
