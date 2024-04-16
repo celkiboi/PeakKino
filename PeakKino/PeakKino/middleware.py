@@ -4,6 +4,7 @@ from django.utils.deprecation import MiddlewareMixin
 from videos.models import Resource
 from django.shortcuts import get_object_or_404
 import os
+from videos.models import Video
 
 class CheckAuthentificationMiddleware:
     def __init__(self, get_response):
@@ -13,9 +14,12 @@ class CheckAuthentificationMiddleware:
         if not request.user.is_authenticated and request.path.startswith(settings.MEDIA_URL):
             return HttpResponseForbidden("You are not authorized to access this resource.")
         
-        # if request.path.startswith(settings.MEDIA_URL):
-        #     resource_id = int(request.path.split("/")[1])
-        #     #resource = 
+        if request.path.startswith(settings.MEDIA_URL):
+            id = int(request.path.split('/')[2])
+            video = get_object_or_404(Video, pk=id)
+            resource = video.get_resource()
+            if not request.user.can_view_content(resource):
+                return HttpResponseForbidden(f"Your age does not permit you to view {resource.age_rating}+ content")
         
         response = self.get_response(request)
         return response

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
 from django.utils import timezone
+from videos.models import Resource
 
 class CustomUserManager(UserManager):
     def _create_user(self, user_name, password, age, **extra_fields):
@@ -40,3 +41,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_login = models.DateTimeField(blank=True, null=True)
 
     objects = CustomUserManager()
+
+    def can_view_content(self, resource: Resource) -> bool:
+        return int(resource.age_rating) <= self.age

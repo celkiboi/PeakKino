@@ -31,14 +31,16 @@ class Video(models.Model):
         elif self.type == 'episode':
             return Episode.objects.filter(video=self.pk).first()
     
-    def get_path(self):
+    def get_resource(self):
         obj = self.get_attached_obj()
-        resource = obj.resource
+        return obj.resource
+        
+    def get_path(self):
+        resource = self.get_resource()
         resource_id = resource.pk
         uuid_path = str(self.uuid).replace('-', '')
 
-        return f'/{resource_id}/{uuid_path}.{self.extension}'
-        
+        return f'{resource_id}/{uuid_path}.{self.extension}'
 
 class Movie(models.Model):
     title = models.CharField(max_length=255)
