@@ -16,8 +16,7 @@ class CheckAuthentificationMiddleware:
         
         if request.path.startswith(settings.MEDIA_URL):
             id = int(request.path.split('/')[2])
-            video = get_object_or_404(Video, pk=id)
-            resource = video.get_resource()
+            resource = get_object_or_404(Resource, pk=id)
             if not request.user.can_view_content(resource):
                 return HttpResponseForbidden(f"Your age does not permit you to view {resource.age_rating}+ content")
         

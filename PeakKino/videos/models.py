@@ -1,5 +1,7 @@
 from django.db import models
 import uuid
+import os
+from datetime import datetime
 
 class Resource(models.Model):
     AGE_RATING_CHOICES = [
@@ -23,6 +25,14 @@ class Video(models.Model):
     extension = models.CharField(max_length=8, default='mp4')
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
 
+    def save(self, *args, **kwargs):
+        if self.pk is None: 
+            self.uuid = uuid.uuid4()
+            self.uploaded = datetime.now()
+
+        super().save(*args, **kwargs)
+
+
     def get_attached_obj(self):
         if self.type == 'clip':
             return Clip.objects.filter(video =self.pk).first()
@@ -40,7 +50,7 @@ class Video(models.Model):
         resource_id = resource.pk
         uuid_path = str(self.uuid).replace('-', '')
 
-        return f'{resource_id}/{uuid_path}.{self.extension}'
+        return f'{resource_id}/{uuid_path}{self.extension}'
 
 class Movie(models.Model):
     title = models.CharField(max_length=255)
