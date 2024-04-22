@@ -1,22 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Watching {{ title }}</title>
-    <style>
-        video {
-            max-width: 100%;
-            max-height: 100vh;
-        }
-    </style>
-    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-</head>
-<body>
-    <video controls>
-        <source src="{{ path }}" type="video/mp4">
-    </video>
-    <h1>
-        
-    </h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<video controls>
+    <source src="{{ path }}" type="video/mp4">
+</video>
+{% endblock %}
