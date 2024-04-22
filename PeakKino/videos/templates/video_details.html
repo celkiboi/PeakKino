@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>{{ attached_obj.title }}</h1>
-<img src="{{ thumbnail_path }}"/>
+<img src="{{ thumbnail_path }}" style="max-width: 100%; max-height: 75vh;"/>
 <h3><a href="{{ video_path }}">WATCH NOW</a></h3>
     {% if video.type == 'clip' %}
     

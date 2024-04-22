@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<video controls>
-    <source src="{{ path }}" type="video/mp4">
+<video controls type="video/mp4" style="max-width: 100%; max-height: 75vh;">
+    <source src="{{ path }}"/>
 </video>
 {% endblock %}
