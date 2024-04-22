@@ -32,7 +32,7 @@ class Video(models.Model):
 
         super().save(*args, **kwargs)
 
-
+    # get a movie/episode/clip object, depending on the video type
     def get_attached_obj(self):
         if self.type == 'clip':
             return Clip.objects.filter(video =self.pk).first()
@@ -51,6 +51,13 @@ class Video(models.Model):
         uuid_path = str(self.uuid).replace('-', '')
 
         return f'{resource_id}/{uuid_path}{self.extension}'
+    
+    def get_thumbnail_path(self):
+        resource = self.get_resource()
+        resource_id = resource.pk
+        uuid_path = str(self.uuid).replace('-', '')
+
+        return f'{resource_id}/{uuid_path}.webp'
 
 class Movie(models.Model):
     title = models.CharField(max_length=255)

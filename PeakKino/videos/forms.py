@@ -3,6 +3,11 @@ from django.conf import settings
 from .models import Clip, Resource, Video
 from django.core.exceptions import ValidationError
 import os
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
+import cv2
+from io import BytesIO
+from django.core.files.base import ContentFile
 
 class ClipUploadForm(forms.ModelForm):
     class Meta:
@@ -26,6 +31,8 @@ class ClipUploadForm(forms.ModelForm):
         if commit:
             clip.save()
             video.save()
+        
+        self.generate_thumbnail(uploaded_file, video)
 
         self.handle_uploaded_file(uploaded_file, video)
         return clip
@@ -49,3 +56,31 @@ class ClipUploadForm(forms.ModelForm):
         validators=[validate_file_extension],
         widget=forms.FileInput(attrs={'accept':'.mp4,.avi,.mov,.mkv'})
     )
+
+    def generate_thumbnail(self, uploaded_file, video_obj: Video):
+        video = cv2.VideoCapture(uploaded_file.temporary_file_path())
+        success, frame = video.read()
+        width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        video.release()
+
+        if not success:
+            raise ValidationError('Failed to read video frame')
+
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        thumbnail_image = Image.fromarray(frame_rgb)
+        thumbnail_image.thumbnail((width, height))
+
+        thumbnail_buffer = BytesIO()
+        thumbnail_image.save(thumbnail_buffer, format='WEBP')
+        thumbnail_buffer.seek(0)
+
+        thumbnail_content = ContentFile(thumbnail_buffer.getvalue())
+        thumbnail_name = f'{video_obj.uuid}.webp'
+        thumbnail_path = settings.MEDIA_ROOT + '/' + video_obj.get_thumbnail_path()
+
+        os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
+        with open(thumbnail_path, 'wb+') as destination:
+            destination.write(thumbnail_content.read())
+
+        return thumbnail_name

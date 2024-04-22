@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from .forms import ClipUploadForm
 from .decorators import staff_required
+from django.urls import reverse
 
 @login_required
 def watch_video(request, video_id):
@@ -32,3 +33,26 @@ def upload_clip(request):
     else:
         form = ClipUploadForm()
     return render(request, 'upload_clip.html', {'form': form})
+
+@login_required
+def video_details(request, video_id):
+    video = get_object_or_404(Video, id=video_id)
+    resource = video.get_resource()
+
+    if not request.user.can_view_content(resource):
+        return HttpResponseForbidden(f"Your age does not permit you to view {resource.age_rating}+ content")
+    
+    # get a movie/episode/clip object, depending on the video type
+    attached_obj = video.get_attached_obj()
+    thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
+    video_path = reverse('videos:watch_video', kwargs={'video_id': video_id})
+
+    context = {
+        'video': video,
+        'resource': resource,
+        'attached_obj': attached_obj,
+        'thumbnail_path': thumbnail_path,
+        'video_path': video_path
+    }
+
+    return render(request, 'video_details.html', context)
