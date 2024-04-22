@@ -56,3 +56,23 @@ def video_details(request, video_id):
     }
 
     return render(request, 'video_details.html', context)
+
+@login_required
+def all_videos(request):
+    videos = Video.objects.all()
+
+    filtered_videos = []
+    for video in videos:
+        if request.user.can_view_content(video.get_resource()):
+            attached_obj = video.get_attached_obj()
+            thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
+            details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
+            filtered_videos.append((video, thumbnail_path, attached_obj, details_page_url))
+            print(details_page_url)
+
+    context = {
+        'videos': filtered_videos,
+    }
+    
+    return render(request, 'all_videos.html', context)
+    

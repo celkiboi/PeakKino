@@ -14,7 +14,7 @@
                 </li>
                 {% if request.user.is_authenticated %}
                     <li>
-                        <a>All videos</a>
+                        <a href="{% url 'videos:all_videos' %}">All videos</a>
                     </li>
                     <li>
                         <a>Movies</a>
@@ -35,6 +35,9 @@
 
             <ul class="accounts-nav">
                 {% if request.user.is_authenticated %}
+                    <li>
+                        Logged in as: {{ request.user.user_name }}
+                    </li>
                     <li>
                         <a href="{% url 'accounts:logout' %}">Logout</a>
                     </li>

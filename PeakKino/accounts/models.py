@@ -43,4 +43,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     def can_view_content(self, resource: Resource) -> bool:
-        return int(resource.age_rating) <= self.age
+        if (resource.age_rating == 'unrated'):
+            return True
+        if self.age == 'unrated':
+            return False # if both were unrated, True would have been returned in the first condition
+        return int(self.age) >= int(resource.age_rating)
+        
