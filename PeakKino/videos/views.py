@@ -68,11 +68,30 @@ def all_videos(request):
             thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
             details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
             filtered_videos.append((video, thumbnail_path, attached_obj, details_page_url))
-            print(details_page_url)
 
     context = {
         'videos': filtered_videos,
     }
     
     return render(request, 'all_videos.html', context)
+
+@login_required
+def content_18_plus(request):
+    if request.user.age < 18:
+        return HttpResponseForbidden(f"Your age does not permit you to view 18+ content")
+    
+    filtered_videos = []
+    videos = Video.objects.all()
+    for video in videos:
+        if video.get_resource().age_rating == '18':
+            attached_obj = video.get_attached_obj()
+            thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
+            details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
+            filtered_videos.append((video, thumbnail_path, attached_obj, details_page_url))
+    
+    context = {
+        'videos': filtered_videos,
+    }
+    
+    return render(request, '18_plus.html', context)
     

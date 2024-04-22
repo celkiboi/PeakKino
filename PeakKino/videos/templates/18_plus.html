@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% for video, thumbnail_path, attached_obj, details_page_url in videos %}
+        <h2>{{ attached_obj.title }}</h2>
+        <img src="{{ thumbnail_path }}" style="max-width: 50%; max-height: 300px"/>
+        <a href="{{ details_page_url }}">WATCH</a>
+    {% endfor %}
+{% endblock %}

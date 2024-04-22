@@ -48,4 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.age == 'unrated':
             return False # if both were unrated, True would have been returned in the first condition
         return int(self.age) >= int(resource.age_rating)
+    
+    def is_18_plus(self):
+        return self.age >= 18
         
