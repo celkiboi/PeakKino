@@ -1,11 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Video, Resource
+from .models import Video, Resource, Clip
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
+from django.views.decorators.http import require_POST
+from django.http import HttpResponseForbidden, JsonResponse
 from .forms import ClipUploadForm
 from .decorators import staff_required
 from django.urls import reverse
+from .utils import delete_folder
 
 @login_required
 def watch_video(request, video_id):
@@ -32,7 +34,7 @@ def upload_clip(request):
             return redirect('/')  
     else:
         form = ClipUploadForm()
-    return render(request, 'upload_clip.html', {'form': form})
+    return render(request, 'upload.html', {'form': form})
 
 @login_required
 def video_details(request, video_id):
@@ -94,4 +96,40 @@ def content_18_plus(request):
     }
     
     return render(request, '18_plus.html', context)
+
+@staff_required
+@login_required
+def delete_clip_page(request):
+    clips = Clip.objects.all()
+
+    render_collection = []
+    for clip in clips:
+        video = clip.video
+        thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
+        details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
+        id = clip.pk
+        render_collection.append((video, thumbnail_path, clip, details_page_url, id))
     
+    context = {
+            'render_collection': render_collection,
+            'type': 'clip'
+        }
+
+    return render(request, 'delete.html', context)
+
+@staff_required
+@login_required
+@require_POST
+def delete_clip(request, clip_id):
+    print('Hello')
+    clip = get_object_or_404(Clip, pk=clip_id)
+    video = clip.video
+    resource = video.get_resource()
+    path = f"{settings.MEDIA_ROOT}/{resource.pk}"
+
+    delete_folder(path)
+    clip.delete()
+    video.delete()
+    resource.delete()
+
+    return JsonResponse({'success': True, 'message': 'Clip deleted succesfully'})
