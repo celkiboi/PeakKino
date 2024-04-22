@@ -19,6 +19,7 @@ from django.urls import path, include, re_path
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.static import serve
+from .views import home_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +27,5 @@ urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('videos/', include(("videos.urls", 'videos'), namespace='videos')),
     path('accounts/', include(("accounts.urls", 'accounts'), namespace='accounts')),
+    path('', home_view, name='home')
 ]

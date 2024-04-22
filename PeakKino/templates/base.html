@@ -7,6 +7,44 @@
 </head>
 <body>
     <div class="template-content">
+        <nav class="navigation">
+            <ul class="links-nav">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                {% if request.user.is_authenticated %}
+                    <li>
+                        <a>All videos</a>
+                    </li>
+                    <li>
+                        <a>Movies</a>
+                    </li>
+                    <li>
+                        <a>Shows</a>
+                    </li>
+                    <li>
+                        <a>Clips</a>
+                    </li>
+                {% endif %}
+                {% if request.user.is_staff %}
+                    <li>
+                        <a href="{% url 'videos:upload_clip' %}">Upload Clip</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <ul class="accounts-nav">
+                {% if request.user.is_authenticated %}
+                    <li>
+                        <a href="{% url 'accounts:logout' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{% url 'accounts:login' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
         {% block content %}
         {% endblock %}
     </div>
