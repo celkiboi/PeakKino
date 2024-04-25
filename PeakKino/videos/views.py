@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Video, Resource, Clip
+from .models import Video, Resource, Clip, Movie
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -121,7 +121,6 @@ def delete_clip_page(request):
 @login_required
 @require_POST
 def delete_clip(request, clip_id):
-    print('Hello')
     clip = get_object_or_404(Clip, pk=clip_id)
     video = clip.video
     resource = video.get_resource()
@@ -146,3 +145,39 @@ def upload_movie(request):
     else:
         form = MovieUploadForm()
     return render(request, 'upload.html', {'form': form, 'type': 'Movie'})
+
+@staff_required
+@login_required
+def delete_movie_page(request):
+    movies = Movie.objects.all()
+
+    render_collection = []
+    for movie in movies:
+        video = movie.video
+        thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
+        details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
+        id = movie.pk
+        render_collection.append((video, thumbnail_path, movie, details_page_url, id))
+    
+    context = {
+            'render_collection': render_collection,
+            'type': 'movie'
+        }
+
+    return render(request, 'delete.html', context)
+
+@staff_required
+@login_required
+@require_POST
+def delete_movie(request, movie_id):
+    movie = get_object_or_404(Movie, pk=movie_id)
+    video = movie.video
+    resource = video.get_resource()
+    path = f"{settings.MEDIA_ROOT}/{resource.pk}"
+
+    delete_folder(path)
+    movie.delete()
+    video.delete()
+    resource.delete()
+
+    return JsonResponse({'success': True, 'message': 'Movie deleted succesfully'})

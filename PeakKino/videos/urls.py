@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import watch_video, upload_clip, video_details, all_videos, content_18_plus, delete_clip_page, delete_clip, upload_movie
+from .views import watch_video, upload_clip, video_details, all_videos, content_18_plus, delete_clip_page, delete_clip, upload_movie, delete_movie, delete_movie_page
 
 app_name="videos"
 urlpatterns = [
@@ -11,4 +11,6 @@ urlpatterns = [
     path('delete/clip/', delete_clip_page, name="delete_clip_page"),
     path('delete/clip/<int:clip_id>/', delete_clip, name="delete_clip"),
     path('upload/movie/', upload_movie, name='upload_movie'),
+    path('delete/movie/', delete_movie_page, name="delete_movie_page"),
+    path('delete/movie/<int:movie_id>/', delete_movie, name="delete_movie"),
 ]

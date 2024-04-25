@@ -4,8 +4,12 @@
 {% for video, thumbnail_path, attached_obj, details_page_url, id in render_collection %}
     <h2>{{ attached_obj.title }}</h2>
     <img src="{{ thumbnail_path }}" style="max-width: 50%; max-height: 300px"/>
-    <br>
-    <a href="{{ details_page_url }}">About</a>
+    <br/>
+    {% if video.type == 'movie' %}
+        <p>Director: {{ attached_obj.director }}</p>
+        <p>Lead actor: {{ attached_obj.lead_actor }}</p>
+    {% endif %}
+    <a href="{{ details_page_url }}">WATCH</a>
     <br>
     <button class="delete-button" id="{{ id }}">Delete this {{ type }}</button>
 {% endfor %}
