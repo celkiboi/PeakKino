@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings
-from .models import Clip, Resource, Video
+from .models import Clip, Resource, Video, Movie
 from django.core.exceptions import ValidationError
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -8,34 +8,13 @@ from PIL import Image
 import cv2
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.db import models
 
-class ClipUploadForm(forms.ModelForm):
+class UploadForm(forms.ModelForm):
     class Meta:
-        model = Clip
-        fields = ['title', 'resource_age_rating']
-
-    def save(self, commit=True):
-        clip = super().save(commit=False)
-
-        age_rating = self.cleaned_data['resource_age_rating']
-        resource = Resource.objects.create(age_rating=age_rating)
-
-        uploaded_file = self.cleaned_data['upload']
-        name, extension = os.path.splitext(str(uploaded_file))
-
-        video = Video.objects.create(type='clip', extension=extension)
-
-        clip.resource = resource
-        clip.video = video
-
-        if commit:
-            clip.save()
-            video.save()
-        
-        self.generate_thumbnail(uploaded_file, video)
-
-        self.handle_uploaded_file(uploaded_file, video)
-        return clip
+        model = Video
+        fields = ['resource_age_rating', 'upload']
+    
     
     def handle_uploaded_file(self, uploaded_file, video):
         path = f'{settings.MEDIA_ROOT}/{video.get_path()}'
@@ -84,3 +63,60 @@ class ClipUploadForm(forms.ModelForm):
             destination.write(thumbnail_content.read())
 
         return thumbnail_name
+
+class MovieUploadForm(UploadForm):
+    class Meta(UploadForm.Meta):
+        model = Movie
+        fields = UploadForm.Meta.fields + ['lead_actor', 'director', 'title']
+
+    def save(self, commit=True):
+        movie = super().save(commit=False)
+
+        age_rating = self.cleaned_data['resource_age_rating']
+        resource = Resource.objects.create(age_rating=age_rating)
+
+        uploaded_file = self.cleaned_data['upload']
+        name, extension = os.path.splitext(str(uploaded_file))
+
+        video = Video.objects.create(type='movie', extension=extension)
+
+        movie.resource = resource
+        movie.video = video
+
+        if commit:
+            movie.save()
+            video.save()
+        
+        self.generate_thumbnail(uploaded_file, video)
+
+        self.handle_uploaded_file(uploaded_file, video)
+        return movie
+
+class ClipUploadForm(UploadForm):
+    class Meta(UploadForm.Meta):
+        model = Clip
+        fields = UploadForm.Meta.fields + ['title']  
+
+    def save(self, commit=True):
+        clip = super().save(commit=False)
+
+        age_rating = self.cleaned_data['resource_age_rating']
+        resource = Resource.objects.create(age_rating=age_rating)
+
+        uploaded_file = self.cleaned_data['upload']
+        name, extension = os.path.splitext(str(uploaded_file))
+
+        video = Video.objects.create(type='clip', extension=extension)
+
+        clip.resource = resource
+        clip.video = video
+
+        if commit:
+            clip.save()
+            video.save()
+        
+        self.generate_thumbnail(uploaded_file, video)
+
+        self.handle_uploaded_file(uploaded_file, video)
+        return clip
+

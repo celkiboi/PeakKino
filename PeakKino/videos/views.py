@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse
-from .forms import ClipUploadForm
+from .forms import ClipUploadForm, MovieUploadForm
 from .decorators import staff_required
 from django.urls import reverse
 from .utils import delete_folder
@@ -34,7 +34,7 @@ def upload_clip(request):
             return redirect('/')  
     else:
         form = ClipUploadForm()
-    return render(request, 'upload.html', {'form': form})
+    return render(request, 'upload.html', {'form': form, 'type': 'Clip'})
 
 @login_required
 def video_details(request, video_id):
@@ -133,3 +133,16 @@ def delete_clip(request, clip_id):
     resource.delete()
 
     return JsonResponse({'success': True, 'message': 'Clip deleted succesfully'})
+
+@login_required
+@staff_required
+def upload_movie(request):
+    if request.method == 'POST':
+        form = MovieUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            movie = form.save(commit=True)
+            uploaded_file = request.FILES['upload']
+            return redirect('/')  
+    else:
+        form = MovieUploadForm()
+    return render(request, 'upload.html', {'form': form, 'type': 'Movie'})
