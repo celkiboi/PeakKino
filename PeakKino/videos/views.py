@@ -181,3 +181,20 @@ def delete_movie(request, movie_id):
     resource.delete()
 
     return JsonResponse({'success': True, 'message': 'Movie deleted succesfully'})
+
+@login_required
+def all_movies(request):
+    movies = Movie.objects.all()
+
+    filtered_movies = []
+    for movie in movies:
+        if request.user.can_view_content(movie.resource):
+            video = movie.video
+            thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
+            details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
+            filtered_movies.append((video, thumbnail_path, movie, details_page_url))
+    context = {
+        'videos': filtered_movies,
+    }
+    
+    return render(request, 'all_videos.html', context)
