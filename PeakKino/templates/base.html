@@ -25,9 +25,11 @@
                     <li>
                         <a>Clips</a>
                     </li>
-                    <li>
-                        <a href="{% url 'videos:18_plus' %}">18+ content</a>
-                    </li>
+                    {% if request.user.age >= 18 %}
+                        <li>
+                            <a href="{% url 'videos:18_plus' %}">18+ content</a>
+                        </li>
+                    {% endif %}
                 {% endif %}
                 {% if request.user.is_staff %}
                     <li>
