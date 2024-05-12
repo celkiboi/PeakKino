@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for account in accounts %}
+        <div>
+            <h2>{{ account.user_name }}</h2>
+            <p>Age: {{ account.age }}</p>
+            <button class="approve-button" id="{{ account.pk }}">Approve</button>
+        </div>
+    {% endfor %}
+
+    <script>
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("approve-button")) {
+                const id = event.target.id;
+                approveAccount(id);
+            }
+        });
+    
+        function approveAccount(id) {
+            fetch(`/accounts/approve_account/${id}/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to approve account');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+{% endblock %}

@@ -53,12 +53,17 @@
 
             <ul class="accounts-nav">
                 {% if request.user.is_authenticated %}
+                <li>
+                    Logged in as: {{ request.user.user_name }}
+                </li>
+                {% if request.user.is_superuser %}
                     <li>
-                        Logged in as: {{ request.user.user_name }}
+                        <a href="{% url 'accounts:approve_accounts' %}">Approve accounts</a>
                     </li>
-                    <li>
-                        <a href="{% url 'accounts:logout' %}">Logout</a>
-                    </li>
+                {% endif %}
+                <li>
+                    <a href="{% url 'accounts:logout' %}">Logout</a>
+                </li>
                 {% else %}
                     <li>
                         <a href="{% url 'accounts:login' %}">Login</a>
