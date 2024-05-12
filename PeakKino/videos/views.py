@@ -5,11 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse
 from .forms import ClipUploadForm, MovieUploadForm
-from accounts.decorators import staff_required
+from accounts.decorators import staff_required, approval_required
 from django.urls import reverse
 from .utils import delete_folder
 
 @login_required
+@approval_required
 def watch_video(request, video_id):
     video = get_object_or_404(Video, id=video_id)
     resource = video.get_resource()
@@ -25,6 +26,7 @@ def watch_video(request, video_id):
 
 @login_required
 @staff_required
+@approval_required
 def upload_clip(request):
     if request.method == 'POST':
         form = ClipUploadForm(request.POST, request.FILES)
@@ -37,6 +39,7 @@ def upload_clip(request):
     return render(request, 'upload.html', {'form': form, 'type': 'Clip'})
 
 @login_required
+@approval_required
 def video_details(request, video_id):
     video = get_object_or_404(Video, id=video_id)
     resource = video.get_resource()
@@ -60,6 +63,7 @@ def video_details(request, video_id):
     return render(request, 'video_details.html', context)
 
 @login_required
+@approval_required
 def all_videos(request):
     videos = Video.objects.all()
 
@@ -78,6 +82,7 @@ def all_videos(request):
     return render(request, 'all_videos.html', context)
 
 @login_required
+@approval_required
 def content_18_plus(request):
     if request.user.age < 18:
         return HttpResponseForbidden(f"Your age does not permit you to view 18+ content")
@@ -99,6 +104,7 @@ def content_18_plus(request):
 
 @staff_required
 @login_required
+@approval_required
 def delete_clip_page(request):
     clips = Clip.objects.all()
 
@@ -119,6 +125,7 @@ def delete_clip_page(request):
 
 @staff_required
 @login_required
+@approval_required
 @require_POST
 def delete_clip(request, clip_id):
     clip = get_object_or_404(Clip, pk=clip_id)
@@ -135,6 +142,7 @@ def delete_clip(request, clip_id):
 
 @login_required
 @staff_required
+@approval_required
 def upload_movie(request):
     if request.method == 'POST':
         form = MovieUploadForm(request.POST, request.FILES)
@@ -148,6 +156,7 @@ def upload_movie(request):
 
 @staff_required
 @login_required
+@approval_required
 def delete_movie_page(request):
     movies = Movie.objects.all()
 
@@ -168,6 +177,7 @@ def delete_movie_page(request):
 
 @staff_required
 @login_required
+@approval_required
 @require_POST
 def delete_movie(request, movie_id):
     movie = get_object_or_404(Movie, pk=movie_id)
@@ -183,6 +193,7 @@ def delete_movie(request, movie_id):
     return JsonResponse({'success': True, 'message': 'Movie deleted succesfully'})
 
 @login_required
+@approval_required
 def all_movies(request):
     movies = Movie.objects.all()
 
@@ -200,6 +211,7 @@ def all_movies(request):
     return render(request, 'all_videos.html', context)
 
 @login_required
+@approval_required
 def all_clips(request):
     clips = Clip.objects.all()
 
