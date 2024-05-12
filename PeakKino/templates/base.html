@@ -23,7 +23,7 @@
                         <a>Shows</a>
                     </li>
                     <li>
-                        <a>Clips</a>
+                        <a href="{% url 'videos:all_clips' %}">Clips</a>
                     </li>
                     {% if request.user.age >= 18 %}
                         <li>
