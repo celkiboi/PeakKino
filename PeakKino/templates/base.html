@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>PeakKino</title>
-    {% load static %}
 </head>
 <body>
     <div class="template-content">
@@ -47,9 +48,19 @@
                     </li>
                     <li id="upload_shows_container">
                         <a id="upload_shows">Upload shows</a>
+                        <ul id="upload_shows_submenu" class="hidden">
+                            <li><a href="#">Create a Show</a></li>
+                            <li><a href="#">Create a Season</a></li>
+                            <li><a href="#">Upload an Episode</a></li>
+                        </ul>
                     </li>
                     <li id="delete_shows_container">
                         <a id="delete_shows">Delete shows</a>
+                        <ul id="delete_shows_submenu" class="hidden">
+                            <li><a href="#">Delete a Show</a></li>
+                            <li><a href="#">Delete a Season</a></li>
+                            <li><a href="#">Delete an Episode</a></li>
+                        </ul>
                     </li>
                 {% endif %}
             </ul>
