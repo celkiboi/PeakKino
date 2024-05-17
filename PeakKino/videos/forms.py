@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings
-from .models import Clip, Resource, Video, Movie
+from .models import Clip, Resource, Video, Movie, Show
 from django.core.exceptions import ValidationError
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -120,3 +120,25 @@ class ClipUploadForm(UploadForm):
         self.handle_uploaded_file(uploaded_file, video)
         return clip
 
+class ShowCreateForm(forms.ModelForm):
+    class Meta:
+        model = Show
+        fields = ['name', 'resource_age_rating']
+
+    resource_age_rating = forms.ChoiceField(choices=Resource.AGE_RATING_CHOICES)
+
+    def save(self, commit=True):
+        show = super().save(commit=False)
+
+        age_rating = self.cleaned_data['resource_age_rating']
+        resource = Resource.objects.create(age_rating=age_rating)
+
+        name = self.cleaned_data['name']
+
+        show.resource = resource
+        show.name = name
+
+        if commit:
+            show.save()
+        
+        return show

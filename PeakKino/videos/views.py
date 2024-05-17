@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse
-from .forms import ClipUploadForm, MovieUploadForm
+from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm
 from accounts.decorators import staff_required, approval_required
 from django.urls import reverse
 from .utils import delete_folder
@@ -227,3 +227,16 @@ def all_clips(request):
     }
 
     return render(request, 'all_videos.html', context)
+
+@login_required
+@staff_required
+@approval_required
+def create_show(request):
+    if request.method == 'POST':
+        form = ShowCreateForm(request.POST)
+        if form.is_valid():
+            show = form.save(commit=True)
+            return redirect('/')
+    else:
+        form = ShowCreateForm()
+    return render(request, 'upload.html', {'form': form, 'type': 'Show'})
