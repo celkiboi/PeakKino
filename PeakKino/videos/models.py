@@ -40,7 +40,7 @@ class Video(models.Model):
             return Movie.objects.filter(video=self.pk).first()
         elif self.type == 'episode':
             return Episode.objects.filter(video=self.pk).first()
-    
+
     def get_resource(self):
         obj = self.get_attached_obj()
         return obj.resource

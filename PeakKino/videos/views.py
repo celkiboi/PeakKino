@@ -3,7 +3,7 @@ from .models import Video, Resource, Clip, Movie
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponseBadRequest
 from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm
 from accounts.decorators import staff_required, approval_required
 from django.urls import reverse
@@ -66,7 +66,7 @@ def video_details(request, video_id):
 @approval_required
 def all_videos(request):
     videos = Video.objects.all()
-
+    print('PICKA')
     filtered_videos = []
     for video in videos:
         if request.user.can_view_content(video.get_resource()):
@@ -75,8 +75,22 @@ def all_videos(request):
             details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
             filtered_videos.append((video, thumbnail_path, attached_obj, details_page_url))
 
+    query = request.GET.get('query', '')
+    if query != '':
+        queried_videos = []
+        
+        for video_tuple in filtered_videos:
+            video = video_tuple[0]
+            if query.lower() in video.get_attached_obj().title.lower():
+                queried_videos.append(video_tuple)
+    
+        filtered_videos = queried_videos
+    else:
+        query = 'Search for videos...'
+
     context = {
         'videos': filtered_videos,
+        'query': query,
     }
     
     return render(request, 'all_videos.html', context)
@@ -96,8 +110,23 @@ def content_18_plus(request):
             details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
             filtered_videos.append((video, thumbnail_path, attached_obj, details_page_url))
     
+    query = request.GET.get('query', '')
+    if query != '':
+        queried_videos = []
+        
+        for video_tuple in filtered_videos:
+            video = video_tuple[0]
+            if query.lower() in video.get_attached_obj().title.lower():
+                queried_videos.append(video_tuple)
+    
+        filtered_videos = queried_videos
+    else:
+        query = 'Search for videos...'
+
     context = {
         'videos': filtered_videos,
+        'query': query,
+        'type': 'all',
     }
     
     return render(request, '18_plus.html', context)
@@ -204,8 +233,24 @@ def all_movies(request):
             thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
             details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
             filtered_movies.append((video, thumbnail_path, movie, details_page_url))
+   
+    query = request.GET.get('query', '')
+    if query != '':
+        queried_movies = []
+        
+        for movie_tuple in filtered_movies:
+            movie = movie_tuple[2]
+            if query.lower() in movie.title.lower():
+                queried_movies.append(movie_tuple)
+    
+        filtered_movies = queried_movies
+    else:
+        query = 'Search for movies...'
+
     context = {
         'videos': filtered_movies,
+        'query': query,
+        'type': 'movies',
     }
     
     return render(request, 'all_videos.html', context)
@@ -222,10 +267,26 @@ def all_clips(request):
             thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
             details_page_url = reverse('videos:video_details', kwargs= {'video_id': video.pk})
             filtered_clips.append((video, thumbnail_path, clip, details_page_url))
-    context = {
-        'videos': filtered_clips
-    }
+    
+    query = request.GET.get('query', '')
+    if query != '':
+        queried_clips = []
+        
+        for clip_tuple in filtered_clips:
+            clip = clip_tuple[2]
+            if query.lower() in clip.title.lower():
+                queried_clips.append(clip_tuple)
+    
+        filtered_clips = queried_clips
+    else:
+        query = 'Search for clips...'
 
+    context = {
+        'videos': filtered_clips,
+        'query': query,
+        'type': 'clips',
+    }
+    
     return render(request, 'all_videos.html', context)
 
 @login_required
@@ -240,3 +301,25 @@ def create_show(request):
     else:
         form = ShowCreateForm()
     return render(request, 'upload.html', {'form': form, 'type': 'Show'})
+
+@login_required
+@approval_required
+def search(request):
+    query = request.GET.get('query', '')
+    type = request.GET.get('type', '')
+    if type not in ['all', 'movies', 'clips', 'shows', '18plus']:
+        return HttpResponseBadRequest()
+
+    url = ''
+    if type == 'all':
+        url = reverse('videos:all_videos') + f'?query={query}'
+    elif type == 'movies':
+        url = reverse('videos:all_movies') + f'?query={query}'
+    elif type == 'clips':
+        url = reverse('videos:all_clips') + f'?query={query}'
+    elif type == 'shows':
+        url = reverse('videos:all_shows') + f'?query={query}'
+    elif type == '18plus':
+        url = reverse('videos:18_plus') + f'?query={query}'
+    
+    return redirect(url)

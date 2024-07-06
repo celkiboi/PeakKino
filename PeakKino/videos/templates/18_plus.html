@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
+
 {% block content %}
+    <h1>Search 18+ content</h1>
+    <input type="text" id="search-input" placeholder="{{query}}"/>
+    <button id="search-button">Search</button>
     {% for video, thumbnail_path, attached_obj, details_page_url in videos %}
         <h2>{{ attached_obj.title }}</h2>
         <img src="{{ thumbnail_path }}" style="max-width: 50%; max-height: 300px"/>
@@ -11,4 +15,18 @@
         {% endif %}
         <a href="{{ details_page_url }}">WATCH</a>
     {% endfor %}
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('search-button').addEventListener('click', function() {
+                var query = document.getElementById('search-input').value;
+                console.log(query);
+                var url = '/videos/search/?query=' + encodeURIComponent(query) + '&type=18plus';
+                console.log(url);
+                window.location.href = url;
+            });
+        });
+    </script>
 {% endblock %}
