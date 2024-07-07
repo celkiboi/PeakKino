@@ -25,3 +25,5 @@ class EpisodeAdmin(admin.ModelAdmin):
     search_fields = ('title', 'season__name')
 
 admin.site.register(Clip)
+
+admin.site.register(UserVideoTimestamp)

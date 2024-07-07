@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Video, Resource, Clip, Movie
+from .models import Video, Resource, Clip, Movie, UserVideoTimestamp
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -8,6 +8,8 @@ from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm
 from accounts.decorators import staff_required, approval_required
 from django.urls import reverse
 from .utils import delete_folder
+from .config import VIDEO_WATCH_UPDATE_INTERVAL
+from datetime import datetime
 
 @login_required
 @approval_required
@@ -15,12 +17,20 @@ def watch_video(request, video_id):
     video = get_object_or_404(Video, id=video_id)
     resource = video.get_resource()
 
+    user_video_timestamp = UserVideoTimestamp.objects.filter(video=video, user=request.user).first()
+    timestamp = 0
+    if user_video_timestamp is not None:
+        timestamp = user_video_timestamp.timestamp
+
     if not request.user.can_view_content(resource):
         return HttpResponseForbidden(f"Your age does not permit you to view {resource.age_rating}+ content")
 
     context = {
         'title' : video.get_attached_obj().title,
-        'path' : settings.MEDIA_URL + video.get_path()
+        'path' : settings.MEDIA_URL + video.get_path(),
+        'updateInterval': VIDEO_WATCH_UPDATE_INTERVAL,
+        'id': video.id,
+        'timestamp': timestamp
     }
     return render(request, 'watch_video.html', context)
 
@@ -161,7 +171,10 @@ def delete_clip(request, clip_id):
     video = clip.video
     resource = video.get_resource()
     path = f"{settings.MEDIA_ROOT}/{resource.pk}"
+    user_video_timestamps = UserVideoTimestamp.objects.filter(video=video)
 
+    for timestamp in user_video_timestamps:
+        timestamp.delete()
     delete_folder(path)
     clip.delete()
     video.delete()
@@ -213,7 +226,10 @@ def delete_movie(request, movie_id):
     video = movie.video
     resource = video.get_resource()
     path = f"{settings.MEDIA_ROOT}/{resource.pk}"
+    user_video_timestamps = UserVideoTimestamp.objects.filter(video=video)
 
+    for timestamp in user_video_timestamps:
+        timestamp.delete()
     delete_folder(path)
     movie.delete()
     video.delete()
@@ -323,3 +339,29 @@ def search(request):
         url = reverse('videos:18_plus') + f'?query={query}'
     
     return redirect(url)
+
+@login_required
+@approval_required
+@require_POST
+def update_timestamp(request, video_id):
+    video = Video.objects.filter(id=video_id).first()
+    timestamp = int(float(request.POST.get('timestamp', 0)))
+    user = request.user
+
+    user_video_timestamp, created = UserVideoTimestamp.objects.get_or_create(
+        user=user,
+        video=video,
+        defaults={'timestamp': timestamp}
+    )
+
+    if not created:
+        user_video_timestamp.timestamp = timestamp
+        user_video_timestamp.last_watched = datetime.now()
+        user_video_timestamp.save()
+    
+    response_data = {
+        'status': 'success',
+        'timestamp': user_video_timestamp.timestamp,
+    }
+
+    return JsonResponse(response_data)

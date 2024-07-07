@@ -1,7 +1,49 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<video controls type="video/mp4" style="max-width: 100%; max-height: 75vh;">
+<video id="videoPlayer" controls type="video/mp4" style="max-width: 100%; max-height: 75vh;">
     <source src="{{ path }}"/>
 </video>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var videoElement = document.getElementById('videoPlayer');
+        var previousUpdate = Number("{{timestamp}}");
+        var updateInterval = Number("{{updateInterval}}")
+
+        videoElement.currentTime = previousUpdate;
+
+        function updateServer(timestamp) {
+            fetch(`/videos/{{id}}/updatetimestamp?timestamp=${timestamp}`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: new URLSearchParams({
+                    'timestamp': timestamp
+                })
+            })
+        }
+
+        function readCurrentTime() {
+            var currentTime = videoElement.currentTime;
+            if (Math.abs(currentTime - previousUpdate) > updateInterval) {
+                updateServer(currentTime);
+                previousUpdate = currentTime;
+            }
+        }
+
+        videoElement.addEventListener('timeupdate', readCurrentTime);
+        videoElement.addEventListener('play', readCurrentTime);
+        videoElement.addEventListener('pause', readCurrentTime);
+        videoElement.addEventListener('seeked', readCurrentTime);
+
+        readCurrentTime();
+    });
+
+</script>
 {% endblock %}

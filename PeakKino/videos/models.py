@@ -3,6 +3,15 @@ import uuid
 import os
 from datetime import datetime
 
+'''
+    Fixes the circular import
+    I.E. importing resource from video.models
+    but then importing user from accounts.models
+'''
+def get_user_model():
+    from accounts.models import User
+    return User
+
 class Resource(models.Model):
     AGE_RATING_CHOICES = [
         ('18', '18+'),
@@ -83,3 +92,9 @@ class Clip(models.Model):
     title = models.CharField(max_length=255)
     resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
+
+class UserVideoTimestamp(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    timestamp = models.PositiveIntegerField()
+    last_watched = models.DateTimeField(auto_now=True)
