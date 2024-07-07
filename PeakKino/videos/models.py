@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 import os
 from datetime import datetime
+from django.conf import settings
 
 '''
     Fixes the circular import
@@ -67,6 +68,9 @@ class Video(models.Model):
         uuid_path = str(self.uuid).replace('-', '')
 
         return f'{resource_id}/{uuid_path}.webp'
+    
+    def __str__(self):
+        return self.get_attached_obj().get_full_name()
 
 class Movie(models.Model):
     title = models.CharField(max_length=255)
@@ -74,6 +78,9 @@ class Movie(models.Model):
     lead_actor = models.CharField(max_length=255)
     director = models.CharField(max_length=255)
     resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+
+    def get_full_name(self):
+        return self.title
 
 class Show(models.Model):
     name = models.CharField(max_length=255)
@@ -85,19 +92,37 @@ class Show(models.Model):
 class Season(models.Model):
     show = models.ForeignKey(Show, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
+    number = models.PositiveIntegerField(editable=False, unique=True)
 
 class Episode(models.Model):
     title = models.CharField(max_length=255)
     season = models.ForeignKey(Season, related_name='episodes', on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    number = models.PositiveIntegerField(editable=False, unique=True)
+
+    def get_full_name(self):
+        return f"{self.season.show.name} - S{self.show.number}E{self.number}"
 
 class Clip(models.Model):
     title = models.CharField(max_length=255)
     resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
 
+    def get_full_name(self):
+        return self.title
+
 class UserVideoTimestamp(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     timestamp = models.PositiveIntegerField()
     last_watched = models.DateTimeField(auto_now=True)
+
+class Subtitle(models.Model):
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    language = models.CharField(max_length=64)
+    uuid = models.CharField(max_length=36, default=uuid.uuid4, editable=False, unique=True)
+
+    def get_file_path(self):
+        resource = self.video.get_resource()
+        path = f"{resource.id}/{self.uuid}.vtt"
+        return path

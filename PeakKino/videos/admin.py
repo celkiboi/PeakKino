@@ -8,7 +8,7 @@ class ResourceAdmin(admin.ModelAdmin):
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ('id', 'uploaded')
+    list_display = ('__str__', 'id', 'uploaded')
     readonly_fields = ('uuid',)
 
 @admin.register(Movie)
@@ -27,3 +27,5 @@ class EpisodeAdmin(admin.ModelAdmin):
 admin.site.register(Clip)
 
 admin.site.register(UserVideoTimestamp)
+
+admin.site.register(Subtitle)

@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings
-from .models import Clip, Resource, Video, Movie, Show
+from .models import Clip, Resource, Video, Movie, Show, Subtitle
 from django.core.exceptions import ValidationError
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -10,6 +10,7 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from .utils import srt_to_vtt
 
 class UploadForm(forms.ModelForm):
     class Meta:
@@ -122,7 +123,7 @@ class ClipUploadForm(UploadForm):
         return clip
 
 class ShowCreateForm(forms.ModelForm):
-    image_upload = forms.ImageField(label='Upload Image', required=False)
+    image_upload = forms.ImageField(label='Upload Image', required=True)
 
     class Meta:
         model = Show
@@ -166,3 +167,47 @@ class ShowCreateForm(forms.ModelForm):
             show.save()
         
         return show
+
+class SubtitleUploadForm(forms.ModelForm):
+    subtitle_upload = forms.FileField(label='Upload Subtitle', required=True)
+
+    class Meta:
+        model = Subtitle
+        fields = [ 'language', 'subtitle_upload']
+
+        widgets = {
+            'language': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'language': 'Subtitle Language',
+        }
+    
+    def save(self, video_id, commit=True):
+        subtitle = super().save(commit=False)
+        subtitle.video = Video.objects.filter(id=video_id).first()
+
+        if self.cleaned_data.get('subtitle_upload'):
+            subtitle_file = self.cleaned_data['subtitle_upload']
+            vtt_content = ""
+            _, file_extension = os.path.splitext(subtitle_file.name)
+            if file_extension == ".srt":
+                try:
+                    srt_content = subtitle_file.read().decode('utf-8')
+                except UnicodeDecodeError:
+                    subtitle_file.seek(0)
+                    srt_content = subtitle_file.read().decode('iso-8859-1')
+                vtt_content = srt_to_vtt(srt_content).encode('utf-8')
+            elif file_extension == ".vtt":
+                vtt_content = subtitle_file.read()
+            else:
+                return ValidationError("Unsupported file extension. Please upload a .srt or .vtt file.") 
+
+            path = settings.MEDIA_ROOT + '/' + subtitle.get_file_path()
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'wb+') as destination:
+                destination.write(vtt_content)
+    
+        if commit:
+            subtitle.save(video_id)
+        
+        return subtitle

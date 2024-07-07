@@ -4,7 +4,49 @@
 <h1>{{ attached_obj.title }}</h1>
 <img src="{{ thumbnail_path }}" style="max-width: 100%; max-height: 75vh;"/>
 <h3><a href="{{ video_path }}">WATCH NOW</a></h3>
-    {% if video.type == 'clip' %}
-    
-    {% endif %}
+{% if request.user.is_staff %}
+    <a href="{% url 'videos:upload_subtitle' video.id  %}">Add subtitle</a>
+{% endif %}
+<h2>Avalible subtitles: </h2>
+{% for subtitle in subtitles %}
+    <div>
+        <p>{{subtitle.language}}</p>
+        {% if user.is_staff %}
+            <button class="delete-button" id="{{subtitle.id}}">Delete</button>
+        {% endif %}
+    </div>
+{% endfor %}
 {% endblock %}
+
+{% if user.is_staff %}
+    {% block extra_scripts %}
+        <script>
+            document.addEventListener("click", function(event) {
+                if (event.target.classList.contains("delete-button")) {
+                    const id = event.target.id;
+                    deleteItem(id);
+                }
+            });
+        
+            function deleteItem(id) {
+                fetch(`/videos/delete/subtitle/${id}/`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        console.error('Failed to delete item');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        </script>
+    {% endblock %}
+{% endif %}

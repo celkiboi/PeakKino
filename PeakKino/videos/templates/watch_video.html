@@ -3,6 +3,9 @@
 {% block content %}
 <video id="videoPlayer" controls type="video/mp4" style="max-width: 100%; max-height: 75vh;">
     <source src="{{ path }}"/>
+    {% for subtitle_language, subtitle_path in subtitles %}
+        <track src="{{subtitle_path}}" kind="subtitles" srclang="en" label="{{subtitle_language}}">
+    {% endfor %}
 </video>
 {% endblock %}
 

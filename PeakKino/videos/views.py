@@ -1,21 +1,23 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Video, Resource, Clip, Movie, UserVideoTimestamp
+from .models import Video, Resource, Clip, Movie, UserVideoTimestamp, Subtitle
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponseBadRequest
-from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm
+from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm, SubtitleUploadForm
 from accounts.decorators import staff_required, approval_required
 from django.urls import reverse
 from .utils import delete_folder
 from .config import VIDEO_WATCH_UPDATE_INTERVAL
 from datetime import datetime
+import os
 
 @login_required
 @approval_required
 def watch_video(request, video_id):
     video = get_object_or_404(Video, id=video_id)
     resource = video.get_resource()
+    subtitles = Subtitle.objects.filter(video=video)
 
     user_video_timestamp = UserVideoTimestamp.objects.filter(video=video, user=request.user).first()
     timestamp = 0
@@ -25,12 +27,17 @@ def watch_video(request, video_id):
     if not request.user.can_view_content(resource):
         return HttpResponseForbidden(f"Your age does not permit you to view {resource.age_rating}+ content")
 
+    subs = []
+    for subtitle in subtitles:
+        subs.append((subtitle.language, '/media/' + subtitle.get_file_path()))
+
     context = {
         'title' : video.get_attached_obj().title,
         'path' : settings.MEDIA_URL + video.get_path(),
         'updateInterval': VIDEO_WATCH_UPDATE_INTERVAL,
         'id': video.id,
-        'timestamp': timestamp
+        'timestamp': timestamp,
+        'subtitles': subs,
     }
     return render(request, 'watch_video.html', context)
 
@@ -53,6 +60,7 @@ def upload_clip(request):
 def video_details(request, video_id):
     video = get_object_or_404(Video, id=video_id)
     resource = video.get_resource()
+    subtitles = Subtitle.objects.filter(video=video)
 
     if not request.user.can_view_content(resource):
         return HttpResponseForbidden(f"Your age does not permit you to view {resource.age_rating}+ content")
@@ -62,12 +70,14 @@ def video_details(request, video_id):
     thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
     video_path = reverse('videos:watch_video', kwargs={'video_id': video_id})
 
+
     context = {
         'video': video,
         'resource': resource,
         'attached_obj': attached_obj,
         'thumbnail_path': thumbnail_path,
-        'video_path': video_path
+        'video_path': video_path,
+        'subtitles': subtitles,
     }
 
     return render(request, 'video_details.html', context)
@@ -172,6 +182,9 @@ def delete_clip(request, clip_id):
     resource = video.get_resource()
     path = f"{settings.MEDIA_ROOT}/{resource.pk}"
     user_video_timestamps = UserVideoTimestamp.objects.filter(video=video)
+    subtitles = Subtitle.objects.filter(video=video)
+    for subtitle in subtitles:
+        delete_subtitle(request, subtitle.id)
 
     for timestamp in user_video_timestamps:
         timestamp.delete()
@@ -227,6 +240,9 @@ def delete_movie(request, movie_id):
     resource = video.get_resource()
     path = f"{settings.MEDIA_ROOT}/{resource.pk}"
     user_video_timestamps = UserVideoTimestamp.objects.filter(video=video)
+    subtitles = Subtitle.objects.filter(video=video)
+    for subtitle in subtitles:
+        delete_subtitle(request, subtitle.id)
 
     for timestamp in user_video_timestamps:
         timestamp.delete()
@@ -365,3 +381,28 @@ def update_timestamp(request, video_id):
     }
 
     return JsonResponse(response_data)
+
+@login_required
+@staff_required
+def upload_subtitle(request, video_id):
+    if request.method == 'POST':
+        form = SubtitleUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            subtitle = form.save(commit=True, video_id=video_id)
+            return redirect('/')
+    else:
+        form = SubtitleUploadForm()
+    return render(request, 'upload.html', {'form': form, 'type': 'Subtitle'})
+
+@login_required
+@staff_required
+@require_POST
+def delete_subtitle(request, subtitle_id):
+    subtitle = get_object_or_404(Subtitle, id=subtitle_id)
+    path = f"{settings.MEDIA_ROOT}/{subtitle.get_file_path()}"
+
+    if os.path.exists(path):
+        os.remove(path)
+
+    subtitle.delete()
+    return JsonResponse({'success': True, 'message': 'Subtitle deleted succesfully'})
