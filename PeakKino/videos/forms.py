@@ -9,6 +9,7 @@ import cv2
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.db import models
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 class UploadForm(forms.ModelForm):
     class Meta:
@@ -121,11 +122,24 @@ class ClipUploadForm(UploadForm):
         return clip
 
 class ShowCreateForm(forms.ModelForm):
+    image_upload = forms.ImageField(label='Upload Image', required=False)
+
     class Meta:
         model = Show
-        fields = ['name', 'resource_age_rating']
+        fields = ['name', 'resource_age_rating', 'image_upload']
 
     resource_age_rating = forms.ChoiceField(choices=Resource.AGE_RATING_CHOICES)
+
+    def convert_to_webp(self, image):
+        img = Image.open(image)
+
+        webp_image = BytesIO()
+        img.save(webp_image, 'WEBP')
+
+        webp_image.seek(0)
+        webp_file = InMemoryUploadedFile(webp_image, None, image.name.split('.')[0] + '.webp', 'image/webp', webp_image.tell(), None)
+
+        return webp_file
 
     def save(self, commit=True):
         show = super().save(commit=False)
@@ -137,6 +151,16 @@ class ShowCreateForm(forms.ModelForm):
 
         show.resource = resource
         show.name = name
+
+        if self.cleaned_data.get('image_upload'):
+            image = self.cleaned_data['image_upload']
+            webp_image = self.convert_to_webp(image)
+            image_name = "image.webp"
+            path = settings.MEDIA_ROOT + '/' + show.get_image_path()
+
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'wb+') as destination:
+                destination.write(webp_image.read())
 
         if commit:
             show.save()

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Upload {{ type }}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {{ form.media }}
+        <button type="submit">Submit</button>
+    </form>
+    <button id="autohelp-button">Auto fill info</button>
+    <div class="results">
+        
+    </div>
+{% endblock %}
+
+{% load static %}
+{% block extra_scripts %}
+    <script src="{% static 'show_autofill.js' %}"></script>
+{% endblock %}

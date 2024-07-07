@@ -79,6 +79,9 @@ class Show(models.Model):
     name = models.CharField(max_length=255)
     resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
 
+    def get_image_path(self):
+        return f'{self.resource.id}/image.webp'
+
 class Season(models.Model):
     show = models.ForeignKey(Show, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)

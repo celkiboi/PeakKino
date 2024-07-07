@@ -310,13 +310,13 @@ def all_clips(request):
 @approval_required
 def create_show(request):
     if request.method == 'POST':
-        form = ShowCreateForm(request.POST)
+        form = ShowCreateForm(request.POST, request.FILES)
         if form.is_valid():
             show = form.save(commit=True)
             return redirect('/')
     else:
         form = ShowCreateForm()
-    return render(request, 'upload.html', {'form': form, 'type': 'Show'})
+    return render(request, 'upload_show.html', {'form': form, 'type': 'Show'})
 
 @login_required
 @approval_required
