@@ -466,12 +466,12 @@ def show_details(request, show_id):
 @staff_required
 def create_season(request, show_id):
     if request.method == 'POST':
-        form = SeasonCreateForm(request.POST)
+        form = SeasonCreateForm(request.POST, initial={'show_id': show_id})
         if form.is_valid():
             season = form.save(commit=True, show_id=show_id)
             return redirect('/')
     else:
-        form = SeasonCreateForm()
+        form = SeasonCreateForm(initial={'show_id': show_id})
     return render(request, 'upload.html', {'form': form, 'type': 'Season'})
 
 @login_required
