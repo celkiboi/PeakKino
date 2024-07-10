@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings
-from .models import Clip, Resource, Video, Movie, Show, Subtitle, Season
+from .models import Clip, Resource, Video, Movie, Show, Subtitle, Season, Episode
 from django.core.exceptions import ValidationError
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -249,4 +249,84 @@ class SeasonCreateForm(forms.ModelForm):
         if commit:
             season.save(show_id)
         return season
+
+class EpisodeCreateForm(forms.ModelForm):
+    upload = forms.FileField(label='Upload Video File')
+    title = forms.CharField(max_length=255)
+
+    class Meta:
+        model = Episode
+        fields = ['title', 'upload', 'number']
+
+    def clean_number(self):
+        number = self.cleaned_data.get('number')
+        season_id = self.initial.get('season_id')
+        season = Season.objects.get(id=season_id)
+        if Episode.objects.filter(number=number, season=season).exists():
+            raise ValidationError("This episode already exists")
+        if number < 0:
+            raise ValidationError("The episode number must be a positive integer or 0.")
+        return number
+
+    def save(self, season_id, commit=True):
+        episode = super().save(commit=False)
+
+        season = Season.objects.get(id=season_id)
+        episode.season = season
+        episode.number = self.cleaned_data.get('number')
+
+        uploaded_file = self.cleaned_data['upload']
+        _, extension = os.path.splitext(uploaded_file.name)
+        video = Video.objects.create(type='episode', extension=extension)
+
+        episode.video = video
+
+        if commit:
+            episode.save(season_id)
+        
+        self.generate_thumbnail(uploaded_file, video)
+        self.handle_uploaded_file(uploaded_file, video)
+
+        return episode
     
+    def handle_uploaded_file(self, uploaded_file, video):
+        path = f'{settings.MEDIA_ROOT}/{video.get_path()}'
+        print(path)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+    def validate_file_extension(value):
+        valid_extensions = ['.mp4', '.avi', '.mov', '.mkv']
+        extension = os.path.splitext(value.name)[1]
+        if extension not in valid_extensions:
+            raise ValidationError('Unsupported file extension')
+    
+    def generate_thumbnail(self, uploaded_file, video_obj: Video):
+        video = cv2.VideoCapture(uploaded_file.temporary_file_path())
+        success, frame = video.read()
+        width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        video.release()
+
+        if not success:
+            raise ValidationError('Failed to read video frame')
+
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        thumbnail_image = Image.fromarray(frame_rgb)
+        thumbnail_image.thumbnail((width, height))
+
+        thumbnail_buffer = BytesIO()
+        thumbnail_image.save(thumbnail_buffer, format='WEBP')
+        thumbnail_buffer.seek(0)
+
+        thumbnail_content = ContentFile(thumbnail_buffer.getvalue())
+        thumbnail_name = f'{video_obj.uuid}.webp'
+        thumbnail_path = settings.MEDIA_ROOT + '/' + video_obj.get_thumbnail_path()
+
+        os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
+        with open(thumbnail_path, 'wb+') as destination:
+            destination.write(thumbnail_content.read())
+
+        return thumbnail_name

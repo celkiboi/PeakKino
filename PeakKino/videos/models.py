@@ -53,6 +53,8 @@ class Video(models.Model):
 
     def get_resource(self):
         obj = self.get_attached_obj()
+        if self.type == 'episode':
+            return obj.season.show.resource
         return obj.resource
         
     def get_path(self):
@@ -70,7 +72,10 @@ class Video(models.Model):
         return f'{resource_id}/{uuid_path}.webp'
     
     def __str__(self):
-        return self.get_attached_obj().get_full_name()
+        attached_obj = self.get_attached_obj()
+        if attached_obj:
+            return attached_obj.get_full_name()
+        return "Unknown Full Name"
 
 class Movie(models.Model):
     title = models.CharField(max_length=255)
@@ -98,10 +103,10 @@ class Episode(models.Model):
     title = models.CharField(max_length=255)
     season = models.ForeignKey(Season, related_name='episodes', on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
-    number = models.PositiveIntegerField(editable=False, unique=True)
+    number = models.PositiveIntegerField()
 
     def get_full_name(self):
-        return f"{self.season.show.name} - S{self.show.number}E{self.number}"
+        return f"{self.season.show.name} - S{self.season.number}E{self.number} - {self.title}"
 
 class Clip(models.Model):
     title = models.CharField(max_length=255)

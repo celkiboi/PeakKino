@@ -1,16 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Video, Resource, Clip, Movie, UserVideoTimestamp, Subtitle, Show, Season
+from .models import Video, Resource, Clip, Movie, UserVideoTimestamp, Subtitle, Show, Season, Episode
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponseBadRequest
-from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm, SubtitleUploadForm, SeasonCreateForm
+from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm, SubtitleUploadForm, SeasonCreateForm, EpisodeCreateForm
 from accounts.decorators import staff_required, approval_required
 from django.urls import reverse
 from .utils import delete_folder
 from .config import VIDEO_WATCH_UPDATE_INTERVAL
 from datetime import datetime
 import os
+from itertools import chain
 
 @login_required
 @approval_required
@@ -448,10 +449,15 @@ def show_details(request, show_id):
         return HttpResponseForbidden()
     
     seasons = Season.objects.filter(show=show).order_by('number')
+
+    episodes = list(chain.from_iterable(
+        Episode.objects.filter(season=season) for season in seasons
+    ))
     
     context = {
         'show': show,
         'seasons': seasons,
+        'episodes': episodes,
     }
 
     return render(request, 'show_details.html', context)
@@ -467,3 +473,21 @@ def create_season(request, show_id):
     else:
         form = SeasonCreateForm()
     return render(request, 'upload.html', {'form': form, 'type': 'Season'})
+
+@login_required
+@staff_required
+def upload_episode(request, season_id):
+    if request.method == 'POST':
+        form = EpisodeCreateForm(request.POST, request.FILES, initial={'season_id': season_id})
+        if form.is_valid():
+            episode = form.save(season_id=season_id)
+            return redirect('/')
+    else:
+        form = EpisodeCreateForm(initial={'season_id': season_id})
+        print(form.initial)
+
+    context = {
+        'form': form,
+        'season_id': season_id,
+    }
+    return render(request, 'upload.html', context)

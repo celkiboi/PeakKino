@@ -2,7 +2,20 @@
 {% block content %}
     <h1>{{show.name}}</h1>
     <img src="/media/{{show.get_image_path}}">
-    {% for season in seasons %}
-        <h3>{{season.number}}: {{season.name}}</h3>
+    <div class="seasons">
+        {% for season in seasons %}
+        <div class="episodes">
+            <h2>{{season.number}}: {{season.name}}</h2>
+            {% for episode in episodes %}
+                {% if episode.season == season %}
+                    <h3>{{episode.title}}</h3>
+                    <a href="{% url 'videos:video_details' episode.video.id %}">Watch</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% if request.user.is_staff %}
+            <a href="{% url 'videos:upload_episode' season.id %}">Upload an episode</a>
+        {% endif %}
     {% endfor %}
+    </div>
 {% endblock %}
