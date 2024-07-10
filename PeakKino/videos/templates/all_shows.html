@@ -3,5 +3,6 @@
     {% for show in shows %}
         <h2>{{show.name}}</h2>
         <img src="/media/{{ show.get_image_path }}" style="max-width: 50%; max-height: 300px"/>
+        <a href="{% url 'videos:show_details' show.id %}">WATCH</a>
     {% endfor %}
 {% endblock %}

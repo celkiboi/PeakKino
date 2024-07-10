@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import watch_video, upload_clip, video_details, all_videos, content_18_plus, delete_clip_page, delete_clip, upload_movie, delete_movie, delete_movie_page, all_movies, all_clips, create_show, search, update_timestamp, upload_subtitle, delete_subtitle, all_shows
+from .views import watch_video, upload_clip, video_details, all_videos, content_18_plus, delete_clip_page, delete_clip, upload_movie, delete_movie, delete_movie_page, all_movies, all_clips, create_show, search, update_timestamp, upload_subtitle, delete_subtitle, all_shows, show_details
 
 app_name="videos"
 urlpatterns = [
@@ -20,5 +20,6 @@ urlpatterns = [
     path('<int:video_id>/updatetimestamp/', update_timestamp, name="update_timestamp"),
     path('upload/subtitle/<int:video_id>/', upload_subtitle, name="upload_subtitle"),
     path('delete/subtitle/<int:subtitle_id>/', delete_subtitle, name="delete_subtitle"),
-    path('allshows/', all_shows, name="all_shows")
+    path('allshows/', all_shows, name="all_shows"),
+    path('shows/<int:show_id>/', show_details, name="show_details"),
 ]

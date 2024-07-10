@@ -438,3 +438,17 @@ def all_shows(request):
     }
 
     return render(request, 'all_shows.html', context)
+
+@login_required
+@staff_required
+def show_details(request, show_id):
+    show = get_object_or_404(Show, id=show_id)
+
+    if not request.user.can_view_content(show.resource):
+        return HttpResponseForbidden()
+    
+    context = {
+        'show': show
+    }
+
+    return render(request, 'show_details.html', context)

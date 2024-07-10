@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>{{show.name}}</h1>
+    <img src="/media/{{show.get_image_path}}">
+
+{% endblock %}
