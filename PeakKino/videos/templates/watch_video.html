@@ -19,7 +19,7 @@
         videoElement.currentTime = previousUpdate;
 
         function updateServer(timestamp) {
-            fetch(`/videos/{{id}}/updatetimestamp?timestamp=${timestamp}`, {
+            fetch(`/videos/{{id}}/updatetimestamp/?timestamp=${timestamp}`, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
