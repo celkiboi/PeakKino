@@ -1,10 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Video, Resource, Clip, Movie, UserVideoTimestamp, Subtitle, Show
+from .models import Video, Resource, Clip, Movie, UserVideoTimestamp, Subtitle, Show, Season
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponseBadRequest
-from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm, SubtitleUploadForm
+from .forms import ClipUploadForm, MovieUploadForm, ShowCreateForm, SubtitleUploadForm, SeasonCreateForm
 from accounts.decorators import staff_required, approval_required
 from django.urls import reverse
 from .utils import delete_folder
@@ -447,8 +447,25 @@ def show_details(request, show_id):
     if not request.user.can_view_content(show.resource):
         return HttpResponseForbidden()
     
+    seasons = Season.objects.filter(show=show)
+    
     context = {
-        'show': show
+        'show': show,
+        'seasons': seasons,
     }
 
     return render(request, 'show_details.html', context)
+
+@login_required
+@staff_required
+def create_season(request, show_id):
+    if request.method == 'POST':
+        form = SeasonCreateForm(request.POST)
+        if form.is_valid():
+            season = form.save(commit=True, show_id=show_id)
+            return redirect('/')
+    else:
+        form = SeasonCreateForm()
+    return render(request, 'upload.html', {'form': form, 'type': 'Season'})
+
+    

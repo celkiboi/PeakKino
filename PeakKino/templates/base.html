@@ -43,26 +43,13 @@
                         <a href="{% url 'videos:upload_movie' %}">Upload Movie</a>
                     </li>
                     <li>
+                        <a href="{% url 'videos:create_show' %}">Create Show</a>
+                    </li>
+                    <li>
                         <a href="{% url 'videos:delete_clip_page' %}">Delete a Clip</a>
                     </li>
                     <li>
                         <a href="{% url 'videos:delete_movie_page' %}">Delete a Movie</a>
-                    </li>
-                    <li id="upload_shows_container">
-                        <a id="upload_shows">Upload shows</a>
-                        <ul id="upload_shows_submenu" class="hidden">
-                            <li><a href="{% url 'videos:create_show' %}">Create a Show</a></li>
-                            <li><a href="#">Create a Season</a></li>
-                            <li><a href="#">Upload an Episode</a></li>
-                        </ul>
-                    </li>
-                    <li id="delete_shows_container">
-                        <a id="delete_shows">Delete shows</a>
-                        <ul id="delete_shows_submenu" class="hidden">
-                            <li><a href="#">Delete a Show</a></li>
-                            <li><a href="#">Delete a Season</a></li>
-                            <li><a href="#">Delete an Episode</a></li>
-                        </ul>
                     </li>
                 {% endif %}
             </ul>
@@ -94,10 +81,6 @@
         {% endblock %}
     </div>
 </body>
-
-{% if request.user.is_staff %}
-    <script src="{% static 'show_management.js' %}"></script>
-{% endif %}
 
 
 </html>

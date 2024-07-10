@@ -19,6 +19,8 @@ class MovieAdmin(admin.ModelAdmin):
 class ShowAdmin(admin.ModelAdmin):
     list_display = ('name', 'resource')
 
+admin.site.register(Season)
+
 @admin.register(Episode)
 class EpisodeAdmin(admin.ModelAdmin):
     list_display = ('title', 'season', 'video')

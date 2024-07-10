@@ -92,7 +92,7 @@ class Show(models.Model):
 class Season(models.Model):
     show = models.ForeignKey(Show, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    number = models.PositiveIntegerField(editable=False, unique=True)
+    number = models.PositiveIntegerField()
 
 class Episode(models.Model):
     title = models.CharField(max_length=255)

@@ -1,6 +1,6 @@
 from django import forms
 from django.conf import settings
-from .models import Clip, Resource, Video, Movie, Show, Subtitle
+from .models import Clip, Resource, Video, Movie, Show, Subtitle, Season
 from django.core.exceptions import ValidationError
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -211,3 +211,37 @@ class SubtitleUploadForm(forms.ModelForm):
             subtitle.save(video_id)
         
         return subtitle
+
+class SeasonCreateForm(forms.ModelForm):
+    name = forms.CharField(label='Name', required=False, max_length=255, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Optional'}))
+    number = forms.IntegerField(label='Number', widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+
+    class Meta:
+        model = Season
+        fields = ['number', 'name']
+
+    def clean_number(self):
+        number = self.cleaned_data.get('number')
+        if number <= 0:
+            raise ValidationError("The season number must be a positive integer.")
+        return number
+    
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if not name:
+            number = self.cleaned_data.get('number')
+            name = f"SEASON {number}"
+        return name
+
+    def save(self, show_id, commit=True):
+        season = super().save(commit=False)
+        show = Show.objects.filter(id=show_id).first()
+        season.show = show
+        season.number = self.cleaned_data.get('number')
+        season.name = self.cleaned_data.get('name')
+
+        if commit:
+            season.save(show_id)
+        return season
+    
