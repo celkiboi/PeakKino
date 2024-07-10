@@ -223,6 +223,8 @@ class SeasonCreateForm(forms.ModelForm):
 
     def clean_number(self):
         number = self.cleaned_data.get('number')
+        if Season.objects.filter(number=number).exists():
+            raise ValidationError("This season already exists")
         if number <= 0:
             raise ValidationError("The season number must be a positive integer.")
         return number
@@ -236,9 +238,12 @@ class SeasonCreateForm(forms.ModelForm):
 
     def save(self, show_id, commit=True):
         season = super().save(commit=False)
+
         show = Show.objects.filter(id=show_id).first()
         season.show = show
         season.number = self.cleaned_data.get('number')
+        
+        
         season.name = self.cleaned_data.get('name')
 
         if commit:

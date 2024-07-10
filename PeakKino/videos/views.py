@@ -447,7 +447,7 @@ def show_details(request, show_id):
     if not request.user.can_view_content(show.resource):
         return HttpResponseForbidden()
     
-    seasons = Season.objects.filter(show=show)
+    seasons = Season.objects.filter(show=show).order_by('number')
     
     context = {
         'show': show,
@@ -467,5 +467,3 @@ def create_season(request, show_id):
     else:
         form = SeasonCreateForm()
     return render(request, 'upload.html', {'form': form, 'type': 'Season'})
-
-    
