@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Video, Resource, Clip, Movie, UserVideoTimestamp, Subtitle
+from .models import Video, Resource, Clip, Movie, UserVideoTimestamp, Subtitle, Show
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -86,7 +86,7 @@ def video_details(request, video_id):
 @approval_required
 def all_videos(request):
     videos = Video.objects.all()
-    print('PICKA')
+
     filtered_videos = []
     for video in videos:
         if request.user.can_view_content(video.get_resource()):
@@ -111,6 +111,7 @@ def all_videos(request):
     context = {
         'videos': filtered_videos,
         'query': query,
+        'type': 'all'
     }
     
     return render(request, 'all_videos.html', context)
@@ -406,3 +407,34 @@ def delete_subtitle(request, subtitle_id):
 
     subtitle.delete()
     return JsonResponse({'success': True, 'message': 'Subtitle deleted succesfully'})
+
+@login_required
+@staff_required
+def all_shows(request):
+    shows = Show.objects.all()
+    user = request.user
+
+    filtered_shows = []
+    for show in shows:
+        if user.can_view_content(show.resource):
+            filtered_shows.append(show)
+    
+    query = request.GET.get('query', '')
+    if query != '':
+        queried_shows = []
+
+        for show in filtered_shows:
+            if query.lower() in show.name.lower():
+                queried_shows.append(show)
+
+        filtered_shows = queried_shows
+    else:
+        query = 'Search for shows...'
+
+    context = {
+        'shows': filtered_shows,
+        'query': query,
+        'type': 'shows'
+    }
+
+    return render(request, 'all_shows.html', context)

@@ -1,62 +1,17 @@
-{% extends 'base.html' %}
-{% block content %}
-    <h1>Search Videos</h1>
-    <input type="text" id="search-input" placeholder="{{query}}"/>
-    <button id="search-button">Search</button>
-    <form id="search-form">
-        <label>
-            <input type="radio" name="type" value="all" checked>
-            All
-        </label>
-        <label>
-            <input type="radio" name="type" value="movies">
-            Movies
-        </label>
-        <label>
-            <input type="radio" name="type" value="clips">
-            Clips
-        </label>
-        <label>
-            <input type="radio" name="type" value="shows">
-            Shows
-        </label>
-    </form>
-    
-
+{% extends 'all_stuff_base.html' %}
+{% block extra_content %}
     {% for video, thumbnail_path, attached_obj, details_page_url in videos %}
-        <h2>{{ attached_obj.title }}</h2>
-        <img src="{{ thumbnail_path }}" style="max-width: 50%; max-height: 300px"/>
-        <br/>
-        {% if video.type == 'movie' %}
-            <p>Type: movie</p>
-            <p>Director: {{ attached_obj.director }}</p>
-            <p>Lead actor: {{ attached_obj.lead_actor }}</p>
-        {% endif %}
-        <a href="{{ details_page_url }}">WATCH</a>
-        {% if request.user.is_staff %}
-            <a href="{% url 'videos:upload_subtitle' video.id  %}">Add subtitle</a>
-        {% endif %}
+            <h2>{{ attached_obj.title }}</h2>
+            <img src="{{ thumbnail_path }}" style="max-width: 50%; max-height: 300px"/>
+            <br/>
+            {% if video.type == 'movie' %}
+                <p>Type: movie</p>
+                <p>Director: {{ attached_obj.director }}</p>
+                <p>Lead actor: {{ attached_obj.lead_actor }}</p>
+            {% endif %}
+            <a href="{{ details_page_url }}">WATCH</a>
+            {% if request.user.is_staff %}
+                <a href="{% url 'videos:upload_subtitle' video.id  %}">Add subtitle</a>
+            {% endif %}
     {% endfor %}
-{% endblock %}
-
-{% block extra_scripts %}
-    <script>
-        defaultTypeRadioButton = "{{type}}"
-
-        document.addEventListener("DOMContentLoaded", function() {
-            var defaultRadioButton = document.querySelector('input[name="type"][value="' + defaultTypeRadioButton + '"]');
-            if (defaultRadioButton) {
-                defaultRadioButton.checked = true;
-            }
-
-            document.getElementById('search-button').addEventListener('click', function() {
-                var query = document.getElementById('search-input').value;
-                console.log(query);
-                var type = document.querySelector('input[name="type"]:checked').value;
-                var url = '/videos/search/?query=' + encodeURIComponent(query) + '&type=' + type;
-                console.log(url);
-                window.location.href = url;
-            });
-        });
-    </script>
 {% endblock %}

@@ -1,0 +1,7 @@
+{% extends 'all_stuff_base.html' %}
+{% block extra_content %}
+    {% for show in shows %}
+        <h2>{{show.name}}</h2>
+        <img src="/media/{{ show.get_image_path }}" style="max-width: 50%; max-height: 300px"/>
+    {% endfor %}
+{% endblock %}
