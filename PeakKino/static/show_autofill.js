@@ -1,51 +1,34 @@
 document.addEventListener("DOMContentLoaded", function () {
-    document.addEventListener("click", function(event) {
-        if (event.target.id == "autohelp-button") {
-            var query = document.getElementById('id_name').value;
-            searchTVMaze(query)
-            .then(results => {
-                showSearchResults(results);
-            })
-            .catch(error => {
-                console.error('Error;', error);
-            })
-        }
-    })
-})
-
-function searchTVMaze(query) {
-    return fetch(`https://api.tvmaze.com/search/shows?q=${query}`)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        return data;
-    })
-    .catch(error => {
-        console.error('Error fetching data:', error);
+    document.getElementById("autohelp-button").addEventListener("click", async function(event) {
+        const query = document.getElementById('id_name').value;
+        const results = await searchTVMaze(query);
+        showSearchResults(results);
     });
+});
+
+async function searchTVMaze(query) {
+    const response = await fetch(`https://api.tvmaze.com/search/shows?q=${query}`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok.');
+    }
+    return await response.json();
 }
 
-function showSearchResults(results) {
-    var resultsMenuHTML = ''
 
-    for (i = 0; i < results.length; i++) {
-        if (results[i].show.image === null) {
-            results[i].show.image = {medium: ''};
-        }
-        resultsMenuHTML += `
+function showSearchResults(results) {
+    const resultsContainer = document.querySelector('.results');
+
+    const resultsMenuHTML = results.map((result, index) => {
+        const imageUrl = result.show.image ? result.show.image.medium : '';
+        return `
             <div class="result-entry">
-                <h2>${results[i].show.name}</h2>
-                <img alt="${results[i].show.name}" src="${results[i].show.image.medium}">
-                <button class="select-button" id="${i}">Select</button>
+                <h2>${result.show.name}</h2>
+                <img alt="${result.show.name}" src="${imageUrl}">
+                <button class="select-button" id="${index}">Select</button>
             </div>
         `;
-    }
+    }).join('');
 
-    var resultsContainer = document.querySelector('.results');
     resultsContainer.innerHTML = resultsMenuHTML;
 
     function handleShowSelect(event) {
@@ -54,7 +37,7 @@ function showSearchResults(results) {
             selectAutofill(results[id].show);
         }
 
-        resultsContainer.removeEventListener("click", handleShowSelect)
+        resultsContainer.removeEventListener("click", handleShowSelect);
     }
 
     resultsContainer.addEventListener("click", handleShowSelect);
@@ -64,22 +47,22 @@ function selectAutofill(selectedShow) {
     document.getElementById('id_name').value = selectedShow.name;
     clearImageInput();
     downloadImageFromURI(selectedShow.image.original)
-        .then(file => {
-            var imageInput = document.getElementById('id_image_upload');
-            var fileList = new DataTransfer();
-            fileList.items.add(new File([file], 'autofilled_image.jpg', { type: 'image/jpeg' }));
-            imageInput.files = fileList.files;
+    .then(file => {
+        var imageInput = document.getElementById('id_image_upload');
+        var fileList = new DataTransfer();
+        fileList.items.add(new File([file], 'autofilled_image.jpg', { type: 'image/jpeg' }));
+        imageInput.files = fileList.files;
 
-            imageInput.dispatchEvent(new Event('change'));
+        imageInput.dispatchEvent(new Event('change'));
 
-            alert("WARNING: Age rating is not autofilled");
+        alert("WARNING: Age rating is not autofilled");
 
-            var resultsContainer = document.querySelector('.results');
-            resultsContainer.innerHTML = '';
-        })
-        .catch(error => {
-            console.error('Error in downloadImageFromURI:', error);
-        });
+        var resultsContainer = document.querySelector('.results');
+        resultsContainer.innerHTML = '';
+    })
+    .catch(error => {
+        console.error('Error in downloadImageFromURI:', error);
+    });
 }
 
 function clearImageInput() {
