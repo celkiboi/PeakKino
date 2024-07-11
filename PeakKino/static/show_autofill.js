@@ -48,36 +48,44 @@ function showSearchResults(results) {
     var resultsContainer = document.querySelector('.results');
     resultsContainer.innerHTML = resultsMenuHTML;
 
-    resultsContainer.addEventListener("click", function(event) {
+    function handleShowSelect(event) {
         if (event.target.classList.contains("select-button")) {
             const id = event.target.id;
             selectAutofill(results[id].show);
         }
-    });
+
+        resultsContainer.removeEventListener("click", handleShowSelect)
+    }
+
+    resultsContainer.addEventListener("click", handleShowSelect);
 }
 
 function selectAutofill(selectedShow) {
     document.getElementById('id_name').value = selectedShow.name;
+    clearImageInput();
     downloadImageFromURI(selectedShow.image.original)
-    .then(file => {
-        var imageInput = document.getElementById('id_image_upload');
-        var fileList = new DataTransfer();
-        fileList.items.add(file);
-        imageInput.files = fileList.files;
-        Object.defineProperty(imageInput, 'files', {
-            value: fileList,
-            writable: true
+        .then(file => {
+            var imageInput = document.getElementById('id_image_upload');
+            var fileList = new DataTransfer();
+            fileList.items.add(new File([file], 'autofilled_image.jpg', { type: 'image/jpeg' }));
+            imageInput.files = fileList.files;
+
+            imageInput.dispatchEvent(new Event('change'));
+
+            alert("WARNING: Age rating is not autofilled");
+
+            var resultsContainer = document.querySelector('.results');
+            resultsContainer.innerHTML = '';
+        })
+        .catch(error => {
+            console.error('Error in downloadImageFromURI:', error);
         });
-        imageInput.dispatchEvent(new Event('change'));
+}
 
-        alert("WARNING: Age rating is not autofilled");
-
-        var resultsContainer = document.querySelector('.results');
-        resultsContainer.innerHTML = '';
-    })
-    .catch(error => {
-        console.error('Error in downloadImageFromURI:', error);
-    });
+function clearImageInput() {
+    const imageInput = document.getElementById('id_image_upload');
+    imageInput.value = '';
+    imageInput.files = null;
 }
 
 function downloadImageFromURI(uri) {
