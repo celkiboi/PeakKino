@@ -2,7 +2,9 @@
 {% block content %}
     <h1>{{show.name}}</h1>
     <img src="/media/{{show.get_image_path}}">
-    <a href="{% url 'videos:create_season' show.id %}">Add season</a>
+    {% if request.user.is_staff %}
+        <a href="{% url 'videos:create_season' show.id %}">Add season</a>
+    {% endif %}
     <div class="seasons">
         {% for season in seasons %}
         <div class="episodes">

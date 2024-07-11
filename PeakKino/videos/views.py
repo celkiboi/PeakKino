@@ -410,7 +410,7 @@ def delete_subtitle(request, subtitle_id):
     return JsonResponse({'success': True, 'message': 'Subtitle deleted succesfully'})
 
 @login_required
-@staff_required
+@approval_required
 def all_shows(request):
     shows = Show.objects.all()
     user = request.user
@@ -441,7 +441,7 @@ def all_shows(request):
     return render(request, 'all_shows.html', context)
 
 @login_required
-@staff_required
+@approval_required
 def show_details(request, show_id):
     show = get_object_or_404(Show, id=show_id)
 
