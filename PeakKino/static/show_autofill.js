@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
             var query = document.getElementById('id_name').value;
             searchTVMaze(query)
             .then(results => {
-                results = results;
                 showSearchResults(results);
             })
             .catch(error => {

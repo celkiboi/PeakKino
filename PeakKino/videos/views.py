@@ -334,7 +334,7 @@ def create_show(request):
             return redirect('/')
     else:
         form = ShowCreateForm()
-    return render(request, 'upload_show.html', {'form': form, 'type': 'Show'})
+    return render(request, 'upload_show.html', {'form': form})
 
 @login_required
 @approval_required
@@ -477,6 +477,8 @@ def create_season(request, show_id):
 @login_required
 @staff_required
 def upload_episode(request, season_id):
+    season = get_object_or_404(Season, id=season_id)
+    show = season.show
     if request.method == 'POST':
         form = EpisodeCreateForm(request.POST, request.FILES, initial={'season_id': season_id})
         if form.is_valid():
@@ -489,5 +491,8 @@ def upload_episode(request, season_id):
     context = {
         'form': form,
         'season_id': season_id,
+        'show': show,
+        'season': season,
+        'image_url': '/media/' + str(show.resource.id) + '/image.webp'
     }
-    return render(request, 'upload.html', context)
+    return render(request, 'upload_episode.html', context)
