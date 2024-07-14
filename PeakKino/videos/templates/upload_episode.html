@@ -1,19 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Upload episode for:</h1>
-<h2 id="show-name">{{show.name}}</h2>
-<h3 id="season-name">{{season.number}}. {{season.name}}</h3>
-<img src="{{image_url}}">
-    <form method="post" enctype="multipart/form-data">
+<h1 id="upload-title">Upload episode for:</h1>
+<div class="form-wrapper">
+    <h2 id="show-name">{{show.name}}</h2>
+    <h3 id="season-name">{{season.number}}. {{season.name}}</h3>
+    <img src="{{image_url}}">
+    <form method="post" enctype="multipart/form-data" class="upload-form">
         {% csrf_token %}
         {{ form.as_p }}
         {{ form.media }}
-        <button type="submit">Submit</button>
+        <button type="submit" id="submit-button">Submit</button>
     </form>
     <button id="autohelp-button">Auto fill info</button>
-    <div class="results">
+</div>
+<div class="results">
         
-    </div>
+</div>
 {% endblock %}
 
 {% load static %}
