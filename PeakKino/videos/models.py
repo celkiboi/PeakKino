@@ -62,7 +62,14 @@ class Video(models.Model):
         resource_id = resource.pk
         uuid_path = str(self.uuid).replace('-', '')
 
-        return f'{resource_id}/{uuid_path}{self.extension}'
+        return os.path.join(str(resource_id), f"{uuid_path}{self.extension}")
+    
+    def get_thumbnail_path(self):
+        resource = self.get_resource()
+        resource_id = resource.pk
+        uuid_path = str(self.uuid).replace('-', '')
+
+        return os.path.join(str(resource_id), f"{uuid_path}.webp")
     
     def get_thumbnail_path(self):
         resource = self.get_resource()

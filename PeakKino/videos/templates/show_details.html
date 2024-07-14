@@ -13,6 +13,9 @@
                 {% if episode.season == season %}
                     <h3>{{episode.title}}</h3>
                     <a href="{% url 'videos:video_details' episode.video.id %}">Watch</a>
+                    {% if request.user.is_staff %}
+                        <button class="delete-button" id="{{ episode.id }}">Delete episode</button>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </div>
@@ -21,4 +24,35 @@
         {% endif %}
     {% endfor %}
     </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("delete-button")) {
+                const id = event.target.id;
+                deleteItem(id);
+            }
+        });
+        
+        function deleteItem(id) {
+            fetch(`/videos/delete/episode/${id}/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to delete item');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
 {% endblock %}

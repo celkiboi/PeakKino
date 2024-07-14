@@ -496,3 +496,34 @@ def upload_episode(request, season_id):
         'image_url': '/media/' + str(show.resource.id) + '/image.webp'
     }
     return render(request, 'upload_episode.html', context)
+
+@login_required
+@require_POST
+@staff_required
+def delete_episode(request, episode_id):
+    episode = get_object_or_404(Episode, id=episode_id)
+    video = episode.video
+
+    user_video_timestamps = UserVideoTimestamp.objects.filter(video=video)
+    subtitles = Subtitle.objects.filter(video=video)
+    for subtitle in subtitles:
+        delete_subtitle(request, subtitle.id)
+
+    for timestamp in user_video_timestamps:
+        timestamp.delete()
+    
+    subtitles = Subtitle.objects.filter(video=video)
+    for subtitle in subtitles:
+        delete_subtitle(request, subtitle.id)
+    
+    video_path = os.path.join(settings.MEDIA_ROOT, video.get_path())
+    thumbnail_path = os.path.join(settings.MEDIA_ROOT, video.get_thumbnail_path())
+    if os.path.exists(video_path):
+        os.remove(video_path)
+    if os.path.exists(thumbnail_path):
+        os.remove(thumbnail_path)
+
+    episode.delete()
+    video.delete()
+    
+    return JsonResponse({'success': True, 'message': 'Episode deleted succesfully'})
