@@ -541,3 +541,39 @@ def delete_season(request, season_id):
     season.delete()
 
     return JsonResponse({'success': True, 'message': 'Season deleted succesfully'})
+
+@login_required
+@require_POST
+@staff_required
+def delete_show(request, show_id):
+    show = get_object_or_404(Show, id=show_id)
+
+    seasons = Season.objects.filter(show=show)
+    for season in seasons:
+        delete_season(request, season.id)
+    
+    delete_folder(os.path.join(settings.MEDIA_ROOT, str(show.resource.pk)))
+    show.resource.delete()
+    show.delete()
+
+    return JsonResponse({'success': True, 'message': 'Season deleted succesfully'})
+
+@login_required
+@staff_required
+def delete_show_page(request):
+    shows = Show.objects.all()
+
+    render_collection = []
+    for show in shows:
+        video = None
+        thumbnail_path = f"/media/{show.resource.pk}/image.webp"
+        details_page_url = reverse('videos:show_details', kwargs = {'show_id': show.pk})
+        id = show.pk
+        render_collection.append((video, thumbnail_path, show, details_page_url, id))
+    
+    context = {
+            'render_collection': render_collection,
+            'type': 'show'
+        }
+
+    return render(request, 'delete.html', context)
