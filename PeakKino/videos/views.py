@@ -527,3 +527,17 @@ def delete_episode(request, episode_id):
     video.delete()
     
     return JsonResponse({'success': True, 'message': 'Episode deleted succesfully'})
+
+@login_required
+@require_POST
+@staff_required
+def delete_season(request, season_id):
+    season = get_object_or_404(Season, id=season_id)
+
+    episodes = Episode.objects.filter(season=season)
+    for episode in episodes:
+        delete_episode(request, episode.id)
+    
+    season.delete()
+
+    return JsonResponse({'success': True, 'message': 'Season deleted succesfully'})

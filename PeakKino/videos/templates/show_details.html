@@ -21,6 +21,7 @@
         </div>
         {% if request.user.is_staff %}
             <a href="{% url 'videos:upload_episode' season.id %}">Upload an episode</a>
+            <button class="delete-button-season" id="{{ season.id }}">Delete season</button>
         {% endif %}
     {% endfor %}
     </div>
@@ -37,6 +38,34 @@
         
         function deleteItem(id) {
             fetch(`/videos/delete/episode/${id}/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to delete item');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+    <script>
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("delete-button-season")) {
+                const id = event.target.id;
+                deleteSeason(id);
+            }
+        });
+        
+        function deleteSeason(id) {
+            fetch(`/videos/delete/season/${id}/`, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
