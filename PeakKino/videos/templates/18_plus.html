@@ -15,15 +15,4 @@
 {% endblock %}
 
 {% block extra_scripts %}
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById('search-button').addEventListener('click', function() {
-                var query = document.getElementById('search-input').value;
-                console.log(query);
-                var url = '/videos/search/?query=' + encodeURIComponent(query) + '&type=18plus';
-                console.log(url);
-                window.location.href = url;
-            });
-        });
-    </script>
 {% endblock %}
