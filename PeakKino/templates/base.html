@@ -35,23 +35,25 @@
                     {% endif %}
                 {% endif %}
             </ul>
-            <div class="search-container">
-                {% if query == None %}
-                    <input type="text" id="search-input" placeholder="Search"/>
-                {% else %}
-                    <input type="text" id="search-input" placeholder="{{query}}"/>
-                {% endif %}
-                <form id="search-form">
-                    <label for="type-select">Type:</label>
-                    <select id="type-select" name="type">
-                        <option value="all" selected>All</option>
-                        <option value="movies">Movies</option>
-                        <option value="clips">Clips</option>
-                        <option value="shows">Shows</option>
-                    </select>
-                </form>
-                <button id="search-button">Search</button>
-            </div>
+            {% if request.user.is_authenticated %}
+                <div class="search-container">
+                    {% if query == None %}
+                        <input type="text" id="search-input" placeholder="Search"/>
+                    {% else %}
+                        <input type="text" id="search-input" placeholder="{{query}}"/>
+                    {% endif %}
+                    <form id="search-form">
+                        <label for="type-select">Type:</label>
+                        <select id="type-select" name="type">
+                            <option value="all" selected>All</option>
+                            <option value="movies">Movies</option>
+                            <option value="clips">Clips</option>
+                            <option value="shows">Shows</option>
+                        </select>
+                    </form>
+                    <button id="search-button">Search</button>
+                </div>
+            {% endif %}
 
             <ul class="accounts-nav">
                 {% if request.user.is_authenticated %}
