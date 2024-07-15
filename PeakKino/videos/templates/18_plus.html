@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Search 18+ content</h1>
-    <input type="text" id="search-input" placeholder="{{query}}"/>
-    <button id="search-button">Search</button>
     {% for video, thumbnail_path, attached_obj, details_page_url in videos %}
         <h2>{{ attached_obj.title }}</h2>
         <img src="{{ thumbnail_path }}" style="max-width: 50%; max-height: 300px"/>

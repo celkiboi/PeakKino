@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>PeakKino</title>
-    {% block extra_scripts %}
-    {% endblock %}
+    
 </head>
 <body>
     <div class="template-content">
@@ -36,11 +35,28 @@
                     {% endif %}
                 {% endif %}
             </ul>
+            <div class="search-container">
+                {% if query == None %}
+                    <input type="text" id="search-input" placeholder="Search"/>
+                {% else %}
+                    <input type="text" id="search-input" placeholder="{{query}}"/>
+                {% endif %}
+                <form id="search-form">
+                    <label for="type-select">Type:</label>
+                    <select id="type-select" name="type">
+                        <option value="all" selected>All</option>
+                        <option value="movies">Movies</option>
+                        <option value="clips">Clips</option>
+                        <option value="shows">Shows</option>
+                    </select>
+                </form>
+                <button id="search-button">Search</button>
+            </div>
 
             <ul class="accounts-nav">
                 {% if request.user.is_authenticated %}
                 <li>
-                    Logged in as: {{ request.user.user_name }}
+                    {{ request.user.user_name }}
                 </li>
                 {% if request.user.is_superuser %}
                     <li>
@@ -65,5 +81,22 @@
     </div>
 </body>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var defaultType = "all";
 
+        var typeSelect = document.getElementById('type-select');
+        typeSelect.value = defaultType;
+
+        document.getElementById('search-button').addEventListener('click', function() {
+            var query = document.getElementById('search-input').value;
+            var type = typeSelect.value;
+            var url = '/videos/search/?query=' + encodeURIComponent(query) + '&type=' + type;
+            console.log(url);
+            window.location.href = url;
+        });
+    });
+</script>
+{% block extra_scripts %}
+{% endblock %}
 </html>
