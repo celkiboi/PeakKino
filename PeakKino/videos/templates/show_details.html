@@ -13,6 +13,7 @@
                 {% if episode.season == season %}
                     <h3>{{episode.title}}</h3>
                     <a href="{% url 'videos:video_details' episode.video.id %}">Watch</a>
+                    <p>{{episode.description}}</p>
                     {% if request.user.is_staff %}
                         <button class="delete-button" id="{{ episode.id }}">Delete episode</button>
                     {% endif %}

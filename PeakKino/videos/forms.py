@@ -11,6 +11,7 @@ from django.core.files.base import ContentFile
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from .utils import srt_to_vtt
+from django.utils.html import strip_tags
 
 class UploadForm(forms.ModelForm):
     class Meta:
@@ -258,10 +259,11 @@ class SeasonCreateForm(forms.ModelForm):
 class EpisodeCreateForm(forms.ModelForm):
     upload = forms.FileField(label='Upload Video File')
     title = forms.CharField(max_length=255)
+    description = forms.CharField(widget=forms.Textarea)
 
     class Meta:
         model = Episode
-        fields = ['title', 'upload', 'number']
+        fields = ['title', 'upload', 'number', 'description']
 
     def clean_number(self):
         number = self.cleaned_data.get('number')
@@ -273,12 +275,20 @@ class EpisodeCreateForm(forms.ModelForm):
             raise ValidationError("The episode number must be a positive integer or 0.")
         return number
 
+    def clean_description(self):
+        description = self.cleaned_data.get('description')
+        clean_description = strip_tags(description)
+        if clean_description != description:
+            raise ValidationError("HTML tags are not allowed in the description.")
+        return clean_description
+    
     def save(self, season_id, commit=True):
         episode = super().save(commit=False)
 
         season = Season.objects.get(id=season_id)
         episode.season = season
         episode.number = self.cleaned_data.get('number')
+        episode.description = self.cleaned_data.get('description')
 
         uploaded_file = self.cleaned_data['upload']
         _, extension = os.path.splitext(uploaded_file.name)

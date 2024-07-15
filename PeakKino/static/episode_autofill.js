@@ -124,6 +124,9 @@ function selectEpisode(episode) {
     const numberInput = document.getElementById('id_number');
     numberInput.value = episode.number;
 
+    const descirptionInput = document.getElementById('id_description');
+    descirptionInput.value = episode.summary.replace(/<[^>]*>/g, '');
+
     const resultsContainer = document.querySelector('.results');
     resultsContainer.innerHTML = '';
 }

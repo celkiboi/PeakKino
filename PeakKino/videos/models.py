@@ -111,6 +111,7 @@ class Episode(models.Model):
     season = models.ForeignKey(Season, related_name='episodes', on_delete=models.CASCADE)
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     number = models.PositiveIntegerField()
+    description = models.TextField(max_length=2048)
 
     def get_full_name(self):
         return f"{self.season.show.name} - S{self.season.number}E{self.number} - {self.title}"
