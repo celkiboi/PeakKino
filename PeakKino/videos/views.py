@@ -156,27 +156,6 @@ def content_18_plus(request):
 @staff_required
 @login_required
 @approval_required
-def delete_clip_page(request):
-    clips = Clip.objects.all()
-
-    render_collection = []
-    for clip in clips:
-        video = clip.video
-        thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
-        details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
-        id = clip.pk
-        render_collection.append((video, thumbnail_path, clip, details_page_url, id))
-    
-    context = {
-            'render_collection': render_collection,
-            'type': 'clip'
-        }
-
-    return render(request, 'delete.html', context)
-
-@staff_required
-@login_required
-@approval_required
 @require_POST
 def delete_clip(request, clip_id):
     clip = get_object_or_404(Clip, pk=clip_id)
@@ -210,27 +189,6 @@ def upload_movie(request):
     else:
         form = MovieUploadForm()
     return render(request, 'upload.html', {'form': form, 'type': 'Movie'})
-
-@staff_required
-@login_required
-@approval_required
-def delete_movie_page(request):
-    movies = Movie.objects.all()
-
-    render_collection = []
-    for movie in movies:
-        video = movie.video
-        thumbnail_path = settings.MEDIA_URL + video.get_thumbnail_path()
-        details_page_url = reverse('videos:video_details', kwargs = {'video_id': video.pk})
-        id = movie.pk
-        render_collection.append((video, thumbnail_path, movie, details_page_url, id))
-    
-    context = {
-            'render_collection': render_collection,
-            'type': 'movie'
-        }
-
-    return render(request, 'delete.html', context)
 
 @staff_required
 @login_required
@@ -557,23 +515,3 @@ def delete_show(request, show_id):
     show.delete()
 
     return JsonResponse({'success': True, 'message': 'Season deleted succesfully'})
-
-@login_required
-@staff_required
-def delete_show_page(request):
-    shows = Show.objects.all()
-
-    render_collection = []
-    for show in shows:
-        video = None
-        thumbnail_path = f"/media/{show.resource.pk}/image.webp"
-        details_page_url = reverse('videos:show_details', kwargs = {'show_id': show.pk})
-        id = show.pk
-        render_collection.append((video, thumbnail_path, show, details_page_url, id))
-    
-    context = {
-            'render_collection': render_collection,
-            'type': 'show'
-        }
-
-    return render(request, 'delete.html', context)
