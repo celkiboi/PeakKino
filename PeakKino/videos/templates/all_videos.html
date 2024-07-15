@@ -13,5 +13,8 @@
             {% if request.user.is_staff %}
                 <a href="{% url 'videos:upload_subtitle' video.id  %}">Add subtitle</a>
             {% endif %}
+            {% if type != 'all' %}
+                <button class="delete-button" id="{{attached_obj.pk}}">Delete</button>
+            {% endif %}
     {% endfor %}
 {% endblock %}

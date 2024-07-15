@@ -50,4 +50,33 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener("click", function(event) {
+            if (event.target.classList.contains("delete-button")) {
+                const id = event.target.id;
+                const type = '{{ type }}'.slice(0, -1);
+                deleteItem(id, type);
+            }
+        });
+    
+        function deleteItem(id, type) {
+            fetch(`/videos/delete/${type}/${id}/`, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to delete item');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
 {% endblock %}
