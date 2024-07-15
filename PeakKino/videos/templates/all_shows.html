@@ -1,5 +1,8 @@
 {% extends 'all_stuff_base.html' %}
 {% block extra_content %}
+    {% if request.user.is_staff %}
+        <h2><a href="{{upload_url}}">Create show</a></h2>
+    {% endif %}
     {% for show in shows %}
         <h2>{{show.name}}</h2>
         <img src="/media/{{ show.get_image_path }}" style="max-width: 50%; max-height: 300px"/>

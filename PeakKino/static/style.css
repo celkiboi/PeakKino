@@ -71,7 +71,7 @@ body {
 }
 
 
-@media (max-width: 1200px) {
+@media (max-width: 950px) {
     .navigation {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
@@ -110,7 +110,7 @@ body {
     }
 }
 
-@media (max-width: 750px) {
+@media (max-width: 600px) {
     .navigation {
         display: grid;
         grid-template-columns: 1fr 1fr;

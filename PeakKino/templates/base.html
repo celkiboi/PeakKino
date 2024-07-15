@@ -35,17 +35,6 @@
                         </li>
                     {% endif %}
                 {% endif %}
-                {% if request.user.is_staff %}
-                    <li>
-                        <a href="{% url 'videos:upload_clip' %}">Upload Clip</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'videos:upload_movie' %}">Upload Movie</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'videos:create_show' %}">Create Show</a>
-                    </li>
-                {% endif %}
             </ul>
 
             <ul class="accounts-nav">

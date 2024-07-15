@@ -243,6 +243,7 @@ def all_movies(request):
         'videos': filtered_movies,
         'query': query,
         'type': 'movies',
+        'upload_url': reverse('videos:upload_movie'),
     }
     
     return render(request, 'all_videos.html', context)
@@ -277,6 +278,7 @@ def all_clips(request):
         'videos': filtered_clips,
         'query': query,
         'type': 'clips',
+        'upload_url': reverse('videos:upload_clip'),
     }
     
     return render(request, 'all_videos.html', context)
@@ -393,7 +395,8 @@ def all_shows(request):
     context = {
         'shows': filtered_shows,
         'query': query,
-        'type': 'shows'
+        'type': 'shows',
+        'upload_url': reverse('videos:create_show'),
     }
 
     return render(request, 'all_shows.html', context)
