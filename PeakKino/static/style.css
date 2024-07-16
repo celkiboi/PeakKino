@@ -215,6 +215,14 @@ label {
     border-radius: 8px;
 }
 
+#search-input {
+    width: 20vw;
+}
+
+#alternate-search-input {
+    width: 80vw;
+}
+
 #search-input,
 #alternate-search-input {
     background-color: #000;
@@ -258,7 +266,8 @@ label {
     }
 
     .alternate-search-container {
-        display: inline;
+        display: flex;
+        flex-direction: column;
     }
 }
 
