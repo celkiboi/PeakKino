@@ -7,6 +7,9 @@ __pycache__/
 # Ignore the virtual environment
 /env/
 
+# Ignore the working images directory
+/_working_images/
+
 # Ignore database files
 *.sqlite3
 
