@@ -9,12 +9,21 @@
             </div>
         </div>
     {% endif %}
-    {% for show in shows %}
-        <h2>{{show.name}}</h2>
-        <img src="/media/{{ show.get_image_path }}" style="max-width: 50%; max-height: 300px"/>
-        <a href="{% url 'videos:show_details' show.id %}">WATCH</a>
-        {% if request.user.is_staff %}
-            <button class="delete-button" id="{{show.id}}">Delete</button>
-        {% endif %}
-    {% endfor %}
+    <div class="shows">
+        {% for show in shows %}
+            <div class="clickable-div" data-url="{% url 'videos:show_details' show.id %}">
+                <div class="show-content-container">
+                    <div class="show-container">
+                        <img src="/media/{{ show.get_image_path }}"/>
+                        <div class="show-info">
+                            <h2>{{show.name}}</h2>
+                        </div>
+                    </div>
+                    {% if request.user.is_staff %}
+                        <button class="delete-button" id="{{show.id}}">Delete</button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
