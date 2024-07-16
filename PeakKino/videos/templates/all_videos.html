@@ -1,7 +1,14 @@
 {% extends 'all_stuff_base.html' %}
 {% block extra_content %}
     {% if type != 'all' and request.user.is_staff %}
-        <h2><a href="{{upload_url}}">Upload {{type}}</a></h2>
+        <div class="clickable-div" data-url="{{upload_url}}">
+            <div class="upload-container">
+                <div class="upload-image-container">
+
+                </div>
+                <h3>Upload {{type}}</h3>
+            </div>
+        </div>
     {% endif %}
     {% for video, thumbnail_path, attached_obj, details_page_url in videos %}
             <h2>{{ attached_obj.title }}</h2>

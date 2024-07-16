@@ -192,7 +192,7 @@ label {
 }
 
 .form-wrapper button:hover {
-    background-color: #809410;
+    background-color: #505e00;
 }
 
 .form-wrapper h2,
@@ -244,9 +244,8 @@ label {
 }
 
 #search-button:hover {
-    background-color: #809410;
+    background-color: #505e00;
 }
-
 
 @media (max-width: 1300px) {
     .search-container {
@@ -269,4 +268,41 @@ label {
     .alternate-search-container {
         display: none;
     }
+}
+
+.upload-image-container {
+    height: 35px;
+    aspect-ratio: 65/62;
+    background-image: url('images/upload.webp');
+    background-size: cover;
+    transition: 0.3s ease;
+}
+
+.upload-container:hover {
+    background-color: #505e00;
+
+    .upload-image-container {
+        background-image: url('images/upload-filled.webp');
+    }
+}
+
+.upload-container {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #003f2a;
+    border-radius: 12px;
+    transition: 0.3s ease;
+}
+
+.upload-container h3 {
+    margin-left: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    text-decoration: none;
+}
+
+.clickable-div {
+    display: inline-flex;
+    cursor: pointer;
 }

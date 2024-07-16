@@ -4,7 +4,7 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'style.css' %}" >
     <title>PeakKino</title>
     
 </head>
@@ -99,6 +99,25 @@
         });
     });
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const clickableDivs = document.querySelectorAll(".clickable-div");
+        
+        clickableDivs.forEach(div => {
+            div.addEventListener("mouseup", function(event) {
+                const url = this.getAttribute("data-url");
+                
+                if (event.button === 0) {
+                    window.location.href = url;
+                }
+                if (event.button === 1) {
+                    window.open(url, '_blank');
+                }
+            });
+        });
+    });
+</script>
+
 {% block extra_scripts %}
 {% endblock %}
 </html>

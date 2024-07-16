@@ -1,7 +1,13 @@
 {% extends 'all_stuff_base.html' %}
 {% block extra_content %}
     {% if request.user.is_staff %}
-        <h2><a href="{{upload_url}}">Create show</a></h2>
+        <div class="clickable-div" data-url="{{upload_url}}">
+            <div class="upload-container">
+                <div class="upload-image-container">
+                </div>
+                <h3>Upload shows</h3>
+            </div>
+        </div>
     {% endif %}
     {% for show in shows %}
         <h2>{{show.name}}</h2>
