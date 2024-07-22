@@ -443,7 +443,7 @@ def upload_episode(request, season_id):
     if request.method == 'POST':
         form = EpisodeCreateForm(request.POST, request.FILES, initial={'season_id': season_id})
         if form.is_valid():
-            episode = form.save(season_id=season_id)
+            episode = form.save(commit=True)
             return redirect('/')
     else:
         form = EpisodeCreateForm(initial={'season_id': season_id})

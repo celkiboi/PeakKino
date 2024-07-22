@@ -283,9 +283,10 @@ class EpisodeCreateForm(forms.ModelForm):
             raise ValidationError("HTML tags are not allowed in the description.")
         return clean_description
     
-    def save(self, season_id, commit=True):
+    def save(self, commit=True):
         episode = super().save(commit=False)
 
+        season_id = self.initial.get('season_id')
         season = Season.objects.get(id=season_id)
         episode.season = season
         episode.number = self.cleaned_data.get('number')
@@ -298,7 +299,7 @@ class EpisodeCreateForm(forms.ModelForm):
         episode.video = video
 
         if commit:
-            episode.save(season_id)
+            episode.save()
         
         self.handle_uploaded_file(uploaded_file, video)
         self.generate_thumbnail(uploaded_file, video)
