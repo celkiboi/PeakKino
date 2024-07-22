@@ -429,7 +429,7 @@ def create_season(request, show_id):
     if request.method == 'POST':
         form = SeasonCreateForm(request.POST, initial={'show_id': show_id})
         if form.is_valid():
-            season = form.save(commit=True, show_id=show_id)
+            season = form.save(commit=True)
             return redirect('/')
     else:
         form = SeasonCreateForm(initial={'show_id': show_id})

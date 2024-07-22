@@ -242,9 +242,10 @@ class SeasonCreateForm(forms.ModelForm):
             name = f"SEASON {number}"
         return name
 
-    def save(self, show_id, commit=True):
+    def save(self, commit=True):
         season = super().save(commit=False)
 
+        show_id = self.initial.get('show_id')
         show = Show.objects.filter(id=show_id).first()
         season.show = show
         season.number = self.cleaned_data.get('number')
