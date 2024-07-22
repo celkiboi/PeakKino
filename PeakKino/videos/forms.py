@@ -185,8 +185,10 @@ class SubtitleUploadForm(forms.ModelForm):
             'language': 'Subtitle Language',
         }
     
-    def save(self, video_id, commit=True):
+    def save(self, commit=True):
         subtitle = super().save(commit=False)
+
+        video_id = self.initial.get('video_id')
         subtitle.video = Video.objects.filter(id=video_id).first()
 
         if self.cleaned_data.get('subtitle_upload'):
@@ -211,7 +213,7 @@ class SubtitleUploadForm(forms.ModelForm):
                 destination.write(vtt_content)
     
         if commit:
-            subtitle.save(video_id)
+            subtitle.save()
         
         return subtitle
 

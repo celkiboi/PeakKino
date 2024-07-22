@@ -348,9 +348,9 @@ def update_timestamp(request, video_id):
 @staff_required
 def upload_subtitle(request, video_id):
     if request.method == 'POST':
-        form = SubtitleUploadForm(request.POST, request.FILES)
+        form = SubtitleUploadForm(request.POST, request.FILES, initial={'video_id': video_id})
         if form.is_valid():
-            subtitle = form.save(commit=True, video_id=video_id)
+            subtitle = form.save(commit=True)
             return redirect('/')
     else:
         form = SubtitleUploadForm()
