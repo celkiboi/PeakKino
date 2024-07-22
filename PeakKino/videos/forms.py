@@ -253,7 +253,7 @@ class SeasonCreateForm(forms.ModelForm):
         season.name = self.cleaned_data.get('name')
 
         if commit:
-            season.save(show_id)
+            season.save(commit=True, show=show_id)
         return season
 
 class EpisodeCreateForm(forms.ModelForm):
